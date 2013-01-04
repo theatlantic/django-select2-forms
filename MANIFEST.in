@@ -1,0 +1,5 @@
+include select2/static/select2/css/*
+include select2/static/select2/js/*
+include select2/static/select2/select2/*
+include LICENSE
+reverse-include select2/static *
