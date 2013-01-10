@@ -230,7 +230,9 @@ class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
 
     def __init__(self, *args, **kwargs):
         self.sort_field_name = kwargs.pop('sort_field', self.sort_field_name)
+        help_text = kwargs.get('help_text', u'')
         super(ManyToManyField, self).__init__(*args, **kwargs)
+        self.help_text = help_text
 
     def formfield(self, **kwargs):
         defaults = {
