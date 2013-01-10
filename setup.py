@@ -9,7 +9,7 @@ except ImportError:
 
 setup(
     name='django-select2-forms',
-    version="1.0",
+    version=__import__('select2').__version__,
     description='Django form fields using the Select2 jQuery plugin',
     author='Frankie Dintino',
     author_email='fdintino@theatlantic.com',
