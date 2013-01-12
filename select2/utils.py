@@ -4,6 +4,20 @@ import re
 re_spaces = re.compile(ur"\s+")
 
 
+class cached_property(object):
+    """
+    Decorator that creates converts a method with a single
+    self argument into a property cached on the instance.
+    (not available in django 1.2)
+    """
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, instance, type):
+        res = instance.__dict__[self.func.__name__] = self.func(instance)
+        return res
+
+
 def combine_css_classes(classes, new_classes):
     if not classes:
         if isinstance(new_classes, basestring):

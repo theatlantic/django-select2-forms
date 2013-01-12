@@ -4,4 +4,5 @@
 }
 .select2-container-multi .select2-choices .select2-search-field input {
     line-height: 15px !important;
+    height: 25px;
 }

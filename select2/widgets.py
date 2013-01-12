@@ -21,13 +21,13 @@ class Select(widgets.Input):
 
     class Media:
         js = (
-            "%s%s?v=1" % (settings.STATIC_URL, "select2/js/select2.jquery_ready.js"),
+            "%s%s?v=2" % (settings.STATIC_URL, "select2/js/select2.jquery_ready.js"),
             "%s%s?v=1" % (settings.STATIC_URL, "select2/js/select2.js"),
         )
         css = {
             "all": (
                 "%s%s?v=1" % (settings.STATIC_URL, "select2/css/select2.css"),
-                "%s%s?v=1" % (settings.STATIC_URL, "select2/css/djselect2.css"),
+                "%s%s?v=2" % (settings.STATIC_URL, "select2/css/djselect2.css"),
             )}
 
     js_options_map = {

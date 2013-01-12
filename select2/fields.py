@@ -27,6 +27,9 @@ class Select2FieldMixin(object):
                 widget_kwargs[k] = kwargs.pop(k)
         kwargs['widget'] = self.widget(**widget_kwargs)
         super(Select2FieldMixin, self).__init__(*args, **kwargs)
+        # Django 1.2 backwards-compatibility
+        if not hasattr(self.widget, 'is_required'):
+            self.widget.is_required = self.required
 
 
 class ChoiceField(Select2FieldMixin, forms.ChoiceField):

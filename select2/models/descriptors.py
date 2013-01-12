@@ -2,7 +2,7 @@ from django.db import router
 from django.db.models import signals
 from django.db.models.fields.related import (ManyRelatedObjectsDescriptor,
                                              ReverseManyRelatedObjectsDescriptor)
-from django.utils.functional import cached_property
+from ..utils import cached_property
 
 
 class SortableDescriptorMixin(object):
