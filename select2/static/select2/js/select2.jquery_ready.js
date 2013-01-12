@@ -101,7 +101,6 @@ var DjangoSelect2 = window.DjangoSelect2 || {};
                 },
                 initSelection: function (element, callback) {
                     var inputVal = $input.val();
-                    console.log('inputVal=', inputVal);
                     if (inputVal != '') {
                         $.ajax({
                             url: $input.data('initSelectionUrl'),
@@ -111,8 +110,6 @@ var DjangoSelect2 = window.DjangoSelect2 || {};
                             },
                             success: function(data, textStatus, jqXHR) {
                                 if (typeof(data) == 'object' && typeof(data.results) == 'object' && data.results) {
-                                    console.log(callback);
-                                    console.log(data.results);
                                     callback(data.results);
                                 }
                             }
