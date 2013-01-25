@@ -269,3 +269,11 @@ class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
         super(ManyToManyField, self).contribute_to_related_class(cls, related)
         if not self.rel.is_hidden() and self.sort_field_name is not None:
             setattr(cls, related.get_accessor_name(), SortableManyRelatedObjectsDescriptor(self))
+
+try:
+    from south.modelsinspector import add_introspection_rules
+except ImportError:
+    pass
+else:
+    add_introspection_rules([], ["^select2\.fields\.ManyToManyField"])
+    add_introspection_rules([], ["^select2\.fields\.ForeignKey"])
