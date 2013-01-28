@@ -151,25 +151,12 @@ class RelatedFieldMixin(object):
     ajax = False
 
     def __init__(self, *args, **kwargs):
-        search_field = kwargs.pop('search_field', None)
-        if search_field is None:
-            raise TypeError(
-                ("keyword argument 'search_field' is required for field "
-                 "%(field_name)s <%(cls)s>") % {
-                    'field_name': self.name,
-                    'cls': self.__class__.__name__})
-        self.search_field = search_field
+        self.search_field = kwargs.pop('search_field', None)
         self.js_options = kwargs.pop('js_options', None)
         self.overlay = kwargs.pop('overlay', self.overlay)
         self.case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
         self.ajax = kwargs.pop('ajax', self.ajax)
         super(RelatedFieldMixin, self).__init__(*args, **kwargs)
-        if not callable(search_field) and not isinstance(search_field, basestring):
-            raise TypeError(
-                ("keyword argument 'search_field' must be either callable or "
-                 "string in %(field_name)s <%(cls)s>") % {
-                    'field_name': self.name,
-                    'cls': self.__class__.__name__})
 
     def _get_queryset(self, db=None):
         return self.rel.to._default_manager.using(db).complex_filter(self.rel.limit_choices_to)
@@ -203,6 +190,21 @@ class RelatedFieldMixin(object):
         return models.Field.formfield(self, **defaults)
 
     def contribute_to_related_class(self, cls, related):
+        if self.search_field is None:
+            raise TypeError(
+                ("keyword argument 'search_field' is required for field "
+                 "'%(field_name)s' of model %(app_label)s.%(object_name)s") % {
+                    'field_name': self.name,
+                    'app_label': self.model._meta.app_label,
+                    'object_name': self.model._meta.object_name})
+        if not callable(self.search_field) and not isinstance(self.search_field, basestring):
+            raise TypeError(
+                ("keyword argument 'search_field' must be either callable or "
+                 "string on field '%(field_name)s' of model "
+                 "%(app_label)s.%(object_name)s") % {
+                    'field_name': self.name,
+                    'app_label': self.model._meta.app_label,
+                    'object_name': self.model._meta.object_name})
         if isinstance(self.search_field, basestring):
             opts = related.parent_model._meta
             try:
@@ -210,7 +212,7 @@ class RelatedFieldMixin(object):
             except FieldDoesNotExist:
                 raise ImproperlyConfigured(
                     ("keyword argument 'search_field' references non-existent "
-                     "field '%(search_field)s' in %(field_name)s of "
+                     "field '%(search_field)s' in %(field_name)s of model "
                      "<%(app_label)s.%(object_name)s>") % {
                         'search_field': self.search_field,
                         'field_name': self.name,
@@ -270,10 +272,15 @@ class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
         if not self.rel.is_hidden() and self.sort_field_name is not None:
             setattr(cls, related.get_accessor_name(), SortableManyRelatedObjectsDescriptor(self))
 
+
 try:
     from south.modelsinspector import add_introspection_rules
 except ImportError:
     pass
 else:
-    add_introspection_rules([], ["^select2\.fields\.ManyToManyField"])
-    add_introspection_rules([], ["^select2\.fields\.ForeignKey"])
+    add_introspection_rules(rules=[
+        ((ManyToManyField,), [], {"search_field": ["search_field", {}]}),
+    ], patterns=["^select2\.fields\.ManyToManyField"])
+    add_introspection_rules(rules=[
+        ((ForeignKey,), [], {"search_field": ["search_field", {}]}),
+    ], patterns=["^select2\.fields\.ForeignKey"])
