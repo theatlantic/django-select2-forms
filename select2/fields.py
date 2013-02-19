@@ -222,7 +222,13 @@ class RelatedFieldMixin(object):
 
 
 class ForeignKey(RelatedFieldMixin, models.ForeignKey):
-    pass
+
+    def formfield(self, **kwargs):
+        defaults = {
+            'to_field_name': self.rel.field_name,
+        }
+        defaults.update(**kwargs)
+        return super(ForeignKey, self).formfield(**defaults)
 
 
 class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
