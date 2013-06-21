@@ -31,12 +31,16 @@ if [ ! $ver ]; then
 	exit
 fi
 
+
 name="select2"
 js="$CURR_DIR/../js/$name.js"
 mini="$CURR_DIR/../js/$name.min.js"
 css="$CURR_DIR/../js/$name.css"
 timestamp=$(date)
 tokens="s/@@ver@@/$ver/g;s/\@@timestamp@@/$timestamp/g"
+
+cp "$CURR_DIR/$name.js" $js
+perl -pi -e 's/(?<=\()jQuery/(typeof DjangoSelect2 == '"'"'object'"'"' && DjangoSelect2.jQuery) ? DjangoSelect2.jQuery : jQuery/g;' $js
 
 echo "Tokenizing..."
 
@@ -58,7 +62,7 @@ curl -s \
 	http://closure-compiler.appspot.com/compile \
 	>> "$mini"
 
-perl -pi -e 's/jQuery/(typeof grp == 'object' && DjangoSelect2.jQuery) ? DjangoSelect2.jQuery : jQuery/g;' $mini
+# perl -pi -e 's/jQuery/(typeof grp == 'object' && DjangoSelect2.jQuery) ? DjangoSelect2.jQuery : jQuery/g;' $mini
 
 cp $CURR_DIR/*.png $CURR_DIR/../css
 cp $CURR_DIR/*.gif $CURR_DIR/../css
