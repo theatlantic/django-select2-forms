@@ -168,13 +168,18 @@ class Select2View(object):
             return self.get_response({'error': unicode(e)}, status=500)
 
         search_field = field.search_field
-        qset_contains_filter_key = '%(search_field)s__%(insensitive)scontains' % {
-            'search_field': search_field,
-            'insensitive': 'i' if not field.case_sensitive else '',
-        }
-        queryset = queryset.filter(**{
-            qset_contains_filter_key: q,
-        })
+        if callable(search_field):
+            search_field = search_field(q)
+        if isinstance(search_field, models.Q):
+            q_obj = search_field
+        else:
+            qset_contains_filter_key = '%(search_field)s__%(insensitive)scontains' % {
+                'search_field': search_field,
+                'insensitive': 'i' if not field.case_sensitive else '',
+            }
+            q_obj = models.Q(**{qset_contains_filter_key: q})
+
+        queryset = queryset.filter(q_obj)
 
         data = self.get_data(queryset, page, page_limit)
         return self.get_response(data)
