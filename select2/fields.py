@@ -50,7 +50,7 @@ class Select2ModelFieldMixin(Select2FieldMixin):
     choice_iterator_cls = ModelChoiceIterator
 
     def __init__(self, search_field=None, case_sensitive=False, *args, **kwargs):
-        if search_field is None:
+        if search_field is None and kwargs.get('ajax'):
             raise TypeError(
                 ("keyword argument 'search_field' is required for field "
                  "%s <%s>") % (self.name, self.__class__.__name__))
@@ -190,6 +190,8 @@ class RelatedFieldMixin(object):
         return models.Field.formfield(self, **defaults)
 
     def contribute_to_related_class(self, cls, related):
+        if not self.ajax:
+            return super(RelatedFieldMixin, self).contribute_to_related_class(cls, related)
         if self.search_field is None:
             raise TypeError(
                 ("keyword argument 'search_field' is required for field "
