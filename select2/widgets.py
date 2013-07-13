@@ -60,11 +60,13 @@ class Select(widgets.Input):
         if attrs is None:
             attrs = {}
 
-        self.attrs = {
+        self.attrs = getattr(self, 'attrs', {}) or {}
+
+        self.attrs.update({
             'data-placeholder': kwargs.pop('overlay', None),
             'class': combine_css_classes(attrs.get('class', ''), self.default_class),
             'data-sortable': simplejson.dumps(kwargs.pop('sortable', self.sortable)),
-        }
+        })
 
         self.attrs.update(attrs)
         self.choices = iter(choices)

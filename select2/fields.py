@@ -25,7 +25,9 @@ class Select2FieldMixin(object):
         for k in widget_kwarg_keys:
             if k in kwargs:
                 widget_kwargs[k] = kwargs.pop(k)
-        kwargs['widget'] = self.widget(**widget_kwargs)
+        kwargs['widget'] = kwargs.pop('widget', None) or self.widget
+        if isinstance(kwargs['widget'], type):
+            kwargs['widget'] = kwargs['widget'](**widget_kwargs)
         super(Select2FieldMixin, self).__init__(*args, **kwargs)
         # Django 1.2 backwards-compatibility
         if not hasattr(self.widget, 'is_required'):
