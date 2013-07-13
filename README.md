@@ -15,13 +15,17 @@ created by developers at [The Atlantic](http://www.theatlantic.com/).
 Installation
 ------------
 
-The recommended way to install from source is with pip:
+The recommended way to install is with pip:
 
-        $ pip install -e git+git://github.com/theatlantic/django-select2-forms.git#egg=django-select2-forms
+    pip install django-select2-forms
+
+or, to install with pip from source:
+
+        pip install -e git+git://github.com/theatlantic/django-select2-forms.git#egg=django-select2-forms
 
 If the source is already checked out, use setuptools:
 
-        $ python setup.py develop
+        python setup.py develop
 
 Usage
 -----
