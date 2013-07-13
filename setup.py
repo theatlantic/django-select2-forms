@@ -7,6 +7,15 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
+
+setup_kwargs = {}
+
+try:
+    setup_kwargs['long_description'] = open('README.rst').read()
+except IOError:
+    # Use the create_readme_rst command to convert README to reStructuredText
+    pass
+
 setup(
     name='django-select2-forms',
     version=__import__('select2').__version__,
@@ -24,4 +33,9 @@ setup(
     ],
     include_package_data=True,
     zip_safe=False,
-)
+    entry_points={
+        'distutils.commands': [
+            'create_readme_rst = select2.build:create_readme_rst',
+        ],
+    },
+    **setup_kwargs)
