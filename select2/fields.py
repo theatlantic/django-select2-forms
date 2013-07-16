@@ -25,10 +25,10 @@ class Select2FieldMixin(object):
         for k in widget_kwarg_keys:
             if k in kwargs:
                 widget_kwargs[k] = kwargs.pop(k)
-        kwargs['widget'] = kwargs.pop('widget', None)
         widget = kwargs.pop('widget', None)
-        if isinstance(widget, type) and not issubclass(widget, Select):
-            widget = self.widget
+        if isinstance(widget, type):
+            if not issubclass(widget, Select):
+                widget = self.widget
         elif not isinstance(widget, Select):
             widget = self.widget
         if isinstance(widget, type):
