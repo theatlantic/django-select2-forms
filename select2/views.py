@@ -7,7 +7,7 @@ from django.utils.simplejson import simplejson
 
 from django.db import models
 
-from .fields import ForeignKey
+from .fields import ManyToManyField
 
 
 class ViewException(Exception):
@@ -131,8 +131,16 @@ class Select2View(object):
             return pk_ordering[pk]
         data['results'] = sorted(data['results'], key=results_sort_callback)
 
-        if isinstance(field, ForeignKey) and len(data['results']) == 1:
-            data['results'] = data['results'][0]
+        if len(data['results']) == 1:
+            is_multiple = isinstance(field, ManyToManyField)
+            try:
+                multiple_param = int(self.request.GET.get('multiple'))
+            except (TypeError, ValueError):
+                pass
+            else:
+                is_multiple = (multiple_param == 1)
+            if not is_multiple:
+                data['results'] = data['results'][0]
 
         return self.get_response(data)
 

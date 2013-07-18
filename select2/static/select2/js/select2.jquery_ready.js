@@ -134,12 +134,17 @@ DjangoSelect2.onjqueryload = (function($) {
                     initSelection: function (element, callback) {
                         var inputVal = $input.val();
                         if (inputVal != '') {
+                            var data = {
+                                q: inputVal
+                            };
+                            var select2 = $input.data('select2') || {};
+                            if (typeof select2.opts == 'object' && select2.opts !== null) {
+                                data['multiple'] = (select2.opts.multiple) ? 1 : 0;
+                            }
                             $.ajax({
                                 url: $input.data('initSelectionUrl'),
                                 dataType: 'json',
-                                data: {
-                                    q: inputVal
-                                },
+                                data: data,
                                 success: function(data, textStatus, jqXHR) {
                                     if (typeof(data) == 'object' && typeof(data.results) == 'object' && data.results) {
                                         callback(data.results);
