@@ -117,10 +117,9 @@ class Select2View(object):
         except InvalidParameter, e:
             return self.get_response({'error': unicode(e)}, status=500)
 
-        queryset = copy.deepcopy(field.queryset)
-        queryset = queryset.filter(**{
+        queryset = field.queryset.filter(**{
             (u'%s__in' % field.rel.get_related_field().name): pks,
-        })
+        }).distinct()
         pk_ordering = dict([(force_unicode(pk), i) for i, pk in enumerate(pks)])
 
         data = self.get_data(queryset)
