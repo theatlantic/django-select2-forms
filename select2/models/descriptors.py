@@ -98,9 +98,10 @@ class SortableDescriptorMixin(object):
                 # returned by the ManyRelatedManager by those fields.
                 if self.field.sort_field_name:
                     object_name = opts.object_name.lower()
-                    return qset.order_by('%s__%s' % (object_name, self.field.sort_field_name))
-                else:
-                    return qset
+                    order_by = ['%s__%s' % (object_name, self.field.sort_field_name)]
+                    if self.model._meta.ordering != order_by:
+                        return qset.order_by(*order_by)
+                return qset
 
         ManyRelatedManager.field = self.field
         return ManyRelatedManager
