@@ -128,6 +128,7 @@ The placeholder text that will be displayed on an empty select2 field.
 ##### ajax = False
 
 Calling `select2.fields.ForeignKey` with `ajax = True` causes select2 to populate the autocomplete results using ajax. This argument defaults to `False`.
+The ajax loading mechanism uses urls predefined for model retrieval. Simply include the supplied `select2.urls` into your URL mappings to enable the loading URLs.
 
 ##### search_field
 
