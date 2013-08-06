@@ -112,10 +112,12 @@ class Select(widgets.Input):
 
         attrs.update({
             'data-select2-options': json.dumps(options),
-            'data-init-selection-url': self.reverse('select2_init_selection'),
         })
 
         if self.ajax:
+            attrs.update({
+                'data-init-selection-url': self.reverse('select2_init_selection'),
+            })
             self.input_type = 'hidden'
             self.is_hidden = True
             return super(Select, self).render(name, value, attrs=attrs)
