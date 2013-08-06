@@ -1,4 +1,5 @@
 from itertools import chain
+import json
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -7,7 +8,6 @@ from django.forms.util import flatatt
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
-from django.utils import simplejson
 
 from .utils import combine_css_classes
 
@@ -65,7 +65,7 @@ class Select(widgets.Input):
         self.attrs.update({
             'data-placeholder': kwargs.pop('overlay', None),
             'class': combine_css_classes(attrs.get('class', ''), self.default_class),
-            'data-sortable': simplejson.dumps(kwargs.pop('sortable', self.sortable)),
+            'data-sortable': json.dumps(kwargs.pop('sortable', self.sortable)),
         })
 
         self.attrs.update(attrs)
@@ -111,7 +111,7 @@ class Select(widgets.Input):
             options.update({'allowClear': options.get('allowClear', True)})
 
         attrs.update({
-            'data-select2-options': simplejson.dumps(options),
+            'data-select2-options': json.dumps(options),
             'data-init-selection-url': self.reverse('select2_init_selection'),
         })
 

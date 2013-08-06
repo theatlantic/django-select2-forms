@@ -1,11 +1,10 @@
 import copy
+import json
 
+from django.db import models
 from django.forms.models import ModelChoiceIterator
 from django.http import HttpResponse
 from django.utils.encoding import force_unicode
-from django.utils.simplejson import simplejson
-
-from django.db import models
 
 from .fields import ManyToManyField
 
@@ -24,7 +23,7 @@ class JsonResponse(HttpResponse):
 
     def __init__(self, content='', callback=None, mimetype="application/json", *args, **kwargs):
         if not isinstance(content, basestring):
-            content = simplejson.dumps(content)
+            content = json.dumps(content)
         if callback is not None:
             self.callback = callback
         if self.callback is not None:
