@@ -27,6 +27,29 @@ If the source is already checked out, use setuptools:
 
         python setup.py develop
 
+Configuration
+-------------
+
+`django-select2-forms` serves static assets using [django.contrib.staticfiles](https://docs.djangoproject.com/en/1.5/howto/static-files/), and so requires that `"select2"` be added to your settings' `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS = (
+    # ...
+    'select2',
+)
+```
+
+([django-staticfiles](http://django-staticfiles.readthedocs.org/en/latest/) should also work for Django <= 1.2).
+
+To use django-select2-forms' ajax support, `'select2.urls'` must be included in your urls.py `urlpatterns`:
+
+```python
+urlpatterns = patterns('',
+    # ...
+    url(r'^select2/', include('select2.urls')),
+)
+```
+
 Usage
 -----
 
@@ -128,6 +151,7 @@ The placeholder text that will be displayed on an empty select2 field.
 ##### ajax = False
 
 Calling `select2.fields.ForeignKey` with `ajax = True` causes select2 to populate the autocomplete results using ajax. This argument defaults to `False`.
+The ajax loading mechanism uses urls predefined for model retrieval. Simply include the supplied `select2.urls` into your URL mappings to enable the loading URLs.
 
 ##### search_field
 

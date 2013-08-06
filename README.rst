@@ -21,6 +21,34 @@ If the source is already checked out, use setuptools::
 
         python setup.py develop
 
+Configuration
+=============
+
+``django-select2-forms`` serves static assets using
+`django.contrib.staticfiles <https://docs.djangoproject.com/en/1.5/howto/static-files/>`_,
+and so requires that ``"select2"`` be added to your settings'
+``INSTALLED_APPS``:
+
+::
+
+    INSTALLED_APPS = (
+        # ...
+        'select2',
+    )
+
+(`django-staticfiles <http://django-staticfiles.readthedocs.org/en/latest/>`_
+should also work for Django <= 1.2).
+
+To use django-select2-forms' ajax support, ``'select2.urls'`` must be
+included in your urls.py ``urlpatterns``:
+
+::
+
+    urlpatterns = patterns('',
+        # ...
+        url(r'^select2/', include('select2.urls')),
+    )
+
 Usage
 =====
 
