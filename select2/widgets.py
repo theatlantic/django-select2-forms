@@ -166,12 +166,11 @@ class Select(widgets.Input):
 class SelectMultiple(Select):
 
     def __init__(self, js_options=None, *args, **kwargs):
-        options = {
-            'multiple': True,
-        }
+        options = {}
         if js_options is not None:
             options.update(js_options)
         super(SelectMultiple, self).__init__(js_options=options, *args, **kwargs)
+        self.attrs.update(multiple='multiple')
 
     def _format_value(self, value):
         if isinstance(value, list):
