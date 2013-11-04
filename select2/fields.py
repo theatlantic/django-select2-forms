@@ -6,8 +6,7 @@ from django.forms.models import ModelChoiceIterator
 from django.utils.encoding import force_unicode
 from django.db.models.fields.related import add_lazy_relation
 
-from .models.descriptors import (SortableManyRelatedObjectsDescriptor,
-                                 SortableReverseManyRelatedObjectsDescriptor)
+from .models.descriptors import SortableReverseManyRelatedObjectsDescriptor
 from .widgets import Select, SelectMultiple
 
 
@@ -279,15 +278,6 @@ class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
         super(ManyToManyField, self).contribute_to_class(cls, name)
         if self.sort_field_name is not None:
             setattr(cls, self.name, SortableReverseManyRelatedObjectsDescriptor(self))
-
-    def contribute_to_related_class(self, cls, related):
-        """
-        Replace the descriptor with our custom descriptor, so that the
-        position field (which is saved in the formfield clean()) gets saved
-        """
-        super(ManyToManyField, self).contribute_to_related_class(cls, related)
-        if not self.rel.is_hidden() and self.sort_field_name is not None:
-            setattr(cls, related.get_accessor_name(), SortableManyRelatedObjectsDescriptor(self))
 
 
 try:

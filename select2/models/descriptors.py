@@ -1,15 +1,15 @@
 from django.db import router
 from django.db.models import signals
-from django.db.models.fields.related import (ManyRelatedObjectsDescriptor,
-                                             ReverseManyRelatedObjectsDescriptor)
+from django.db.models.fields.related import ReverseManyRelatedObjectsDescriptor
 from ..utils import cached_property
 
 
-class SortableDescriptorMixin(object):
+class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescriptor):
 
     @cached_property
     def related_manager_cls(self):
-        ManyRelatedManagerBase = super(SortableDescriptorMixin, self).related_manager_cls
+        ManyRelatedManagerBase = super(
+            SortableReverseManyRelatedObjectsDescriptor, self).related_manager_cls
 
         class ManyRelatedManager(ManyRelatedManagerBase):
 
@@ -105,11 +105,3 @@ class SortableDescriptorMixin(object):
 
         ManyRelatedManager.field = self.field
         return ManyRelatedManager
-
-
-class SortableManyRelatedObjectsDescriptor(SortableDescriptorMixin, ManyRelatedObjectsDescriptor):
-    pass
-
-
-class SortableReverseManyRelatedObjectsDescriptor(SortableDescriptorMixin, ReverseManyRelatedObjectsDescriptor):
-    pass
