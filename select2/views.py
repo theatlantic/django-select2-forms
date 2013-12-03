@@ -43,13 +43,13 @@ class Select2View(object):
 
     _field = None
 
-    def get_field(self):
+    def get_field_and_model(self):
+        model_cls = models.get_model(self.app_label, self.model_name)
+        if model_cls is None:
+            raise ViewException('Model %s.%s does not exist' % (self.app_label, self.model_name))
         if self._field is None:
-            model_cls = models.get_model(self.app_label, self.model_name)
-            if model_cls is None:
-                raise ViewException('Model %s.%s does not exist' % (self.app_label, self.model_name))
             self._field = model_cls._meta.get_field(self.field_name)
-        return self._field
+        return self._field, model_cls
 
     def get_response(self, data, **kwargs):
         callback = self.request.GET.get('callback', None)
@@ -62,7 +62,17 @@ class Select2View(object):
         return response_cls(data, **kwargs)
 
     def get_data(self, queryset, page=None, page_limit=None):
-        field = self.get_field()
+        field, model_cls = self.get_field_and_model()
+
+        # Check for the existences of a callable %s_queryset method on the
+        # model class and use it to filter the Select2 queryset.
+        #
+        # This is useful for model inheritance where the limit_choices_to can
+        # not easily be overriden in child classes.
+        model_queryset_method = '%s_queryset' % field.name
+        if callable(getattr(model_cls, model_queryset_method, None)):
+            queryset = getattr(model_cls, model_queryset_method)(queryset)
+
         formfield = field.formfield()
         total_count = None
         if page is not None and page_limit is not None:
@@ -99,7 +109,7 @@ class Select2View(object):
 
     def init_selection(self):
         try:
-            field = self.get_field()
+            field, model_cls = self.get_field_and_model()
         except ViewException, e:
             return self.get_response({'error': unicode(e)}, status=500)
 
@@ -144,7 +154,7 @@ class Select2View(object):
 
     def fetch_items(self):
         try:
-            field = self.get_field()
+            field, model_cls = self.get_field_and_model()
         except ViewException, e:
             return self.get_response({'error': unicode(e)}, status=500)
 

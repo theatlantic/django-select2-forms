@@ -72,7 +72,7 @@ class Select(widgets.Input):
         self.choices = iter(choices)
 
     def reverse(self, lookup_view):
-        opts = self.field.model._meta
+        opts = getattr(self, 'model', self.field.model)._meta
         return reverse(lookup_view, kwargs={
             'app_label': opts.app_label,
             'model_name': opts.object_name.lower(),
