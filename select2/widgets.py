@@ -129,7 +129,9 @@ class Select(widgets.Input):
             value = ''
         final_attrs = self.build_attrs(attrs, name=name)
         output = [u'<select%s>' % flatatt(final_attrs)]
-        options = self.render_options(choices, [value])
+        if not isinstance(value, (list, tuple)):
+            value = [value]
+        options = self.render_options(choices, value)
         if options:
             output.append(options)
         output.append(u'</select>')
@@ -165,13 +167,24 @@ class Select(widgets.Input):
 
 class SelectMultiple(Select):
 
-    def __init__(self, js_options=None, *args, **kwargs):
-        options = {
-            'multiple': True,
-        }
+    allow_multiple_selected = True
+
+    def __init__(self, attrs=None, choices=(), js_options=None, *args, **kwargs):
+        options = {}
+        default_attrs = {}
+        ajax = kwargs.get('ajax', self.ajax)
+        if ajax:
+            options.update({'multiple': True,})
+        else:
+            default_attrs.update({
+                'multiple': 'multiple',
+            })
+        attrs = dict(default_attrs, **attrs) if attrs else default_attrs
         if js_options is not None:
             options.update(js_options)
-        super(SelectMultiple, self).__init__(js_options=options, *args, **kwargs)
+
+        super(SelectMultiple, self).__init__(attrs=attrs, choices=choices,
+                js_options=options, *args, **kwargs)
 
     def _format_value(self, value):
         if isinstance(value, list):
