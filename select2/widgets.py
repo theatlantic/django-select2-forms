@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.forms import widgets
 from django.forms.util import flatatt
+from django.utils.datastructures import MultiValueDict, MergeDict
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
@@ -194,3 +195,8 @@ class SelectMultiple(Select):
     def _has_changed(self, initial, data):
         initial = self._format_value(initial)
         return super(SelectMultiple, self)._has_changed(initial, data)
+
+    def value_from_datadict(self, data, files, name):
+        if isinstance(data, (MultiValueDict, MergeDict)):
+            return data.getlist(name)
+        return data.get(name, None)
