@@ -9,6 +9,7 @@ created by developers at [The Atlantic](http://www.theatlantic.com/).
 * [Usage](#usage)
    * [select2.fields.ForeignKey examples](#select2fieldsforeignkey-examples)
    * [select2.fields.ManyToManyField examples](#select2fieldsmanyomanyfield-examples)
+   * [form field example](#form-field-example)
 * [API Documentation](#api-documentation)
 * [License](#license)
 
@@ -135,6 +136,38 @@ class Entry(models.Model):
         search_field=lambda q: Q(name__icontains=q) | Q(alt_name__icontains=q),
         sort_field='position',
         js_options={'quiet_millis': 200})
+```
+
+#### form field example
+
+If you don't need to use the ajax features of `django-select2-forms` it is possible to use select2 on django forms without modifying your models. The select2 formfields exist in the `select2.fields` module and have the same class names as their standard django counterparts (`ChoiceField`, `MultipleChoiceField`, `ModelChoiceField`, `ModelMultipleChoiceField`). Here is the first `ForeignKey` example above, done with django formfields.
+
+```python
+class AuthorManager(models.Manager):
+    def as_choices(self):
+        for author in self.all():
+            yield (author.pk, unicode(author))
+
+
+class Author(models.Model):
+    name = models.CharField(max_length=100)
+    objects = AuthorManager()
+
+    def __unicode__(self):
+        return self.name
+
+
+class Entry(models.Model):
+    author = models.ForeignKey(Author)
+
+
+class EntryForm(forms.ModelForm):
+    author = select2.fields.ChoiceField(
+            choices=Author.objects.as_choices(),
+            overlay="Choose an author...")
+
+    class Meta:
+        model = Entry
 ```
 
 API Documentation

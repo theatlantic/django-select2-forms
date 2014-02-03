@@ -151,6 +151,42 @@ uses ajax to autocomplete on two variants of an author's name.
             sort_field='position',
             js_options={'quiet_millis': 200})
 
+form field example
+------------------
+
+If you don't need to use the ajax features of ``django-select2-forms``
+it is possible to use select2 on django forms without modifying your
+models. The select2 formfields exist in the ``select2.fields`` module
+and have the same class names as their standard django counterparts
+(``ChoiceField``, ``MultipleChoiceField``, ``ModelChoiceField``,
+``ModelMultipleChoiceField``). Here is the first ``ForeignKey`` example
+above, done with django formfields.
+
+::
+
+    class AuthorManager(models.Manager):
+        def as_choices(self):
+            for author in self.all():
+                yield (author.pk, unicode(author))
+
+    class Author(models.Model):
+        name = models.CharField(max_length=100)
+        objects = AuthorManager()
+
+        def __unicode__(self):
+            return self.name
+
+    class Entry(models.Model):
+        author = models.ForeignKey(Author)
+
+    class EntryForm(forms.ModelForm):
+        author = select2.fields.ChoiceField(
+                choices=Author.objects.as_choices(),
+                overlay="Choose an author...")
+
+        class Meta:
+            model = Entry
+
 API Documentation
 =================
 
