@@ -104,7 +104,8 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, forms.ModelMultipleChoice
         elif not self.required and not value:
             return []
 
-        value = value.split(',')
+        if isinstance(value, basestring):
+            value = value.split(',')
 
         if not isinstance(value, (list, tuple)):
             raise ValidationError(self.error_messages['list'])
