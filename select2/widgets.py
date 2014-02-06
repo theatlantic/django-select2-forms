@@ -103,7 +103,9 @@ class Select(widgets.Input):
 
         if self.ajax:
             ajax_url = options.pop('ajax_url', None)
-            init_url = options.pop('init_url', self.reverse('select2_init_selection'))
+            ajax_init = options.pop('ajax_init', True)
+            init_url = options.pop('init_url', None)
+
             quiet_millis = options.pop('quietMillis', 100)
             is_jsonp = options.pop('jsonp', False)
 
@@ -120,6 +122,11 @@ class Select(widgets.Input):
                 default_ajax_opts[k] = v
             options['ajax'] = default_ajax_opts
 
+            if ajax_init:
+                attrs.update({
+                    'data-init-selection-url': init_url or self.reverse('select2_init_selection'),
+                })
+
         if not self.is_required:
             options.update({'allowClear': options.get('allowClear', True)})
 
@@ -128,10 +135,6 @@ class Select(widgets.Input):
         })
 
         if self.ajax:
-            if init_url:
-                attrs.update({
-                    'data-init-selection-url': init_url,
-                })
             if self.is_hidden:
                 self.input_type = 'hidden'
             return super(Select, self).render(name, value, attrs=attrs)
