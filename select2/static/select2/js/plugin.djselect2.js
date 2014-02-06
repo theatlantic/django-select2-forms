@@ -24,7 +24,7 @@
         this.element.data('djselect2', this);
 
         this.init_selection_url = this.element.attr('data-init-selection-url');
-        this.is_sortable = this.element.attr('data-sortable') == true
+        this.is_sortable = this.element.attr('data-sortable') == 'true';
 
         // Retrieve options from the data attribute.
         var options_data = this.element.attr('data-select2-options') || {};
