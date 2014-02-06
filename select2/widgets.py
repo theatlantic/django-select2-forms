@@ -24,6 +24,7 @@ class Select(widgets.Input):
     class Media:
         js = (
             "%s%s?v=2" % (settings.STATIC_URL, "select2/js/select2.jquery_ready.js"),
+            "%s%s?v=1" % (settings.STATIC_URL, "select2/js/plugin.djselect2.js"),
             "%s%s?v=1" % (settings.STATIC_URL, "select2/js/select2.js"),
         )
         css = {

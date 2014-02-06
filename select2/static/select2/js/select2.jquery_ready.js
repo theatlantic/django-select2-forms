@@ -101,78 +101,16 @@ var DjangoSelect2 = window.DjangoSelect2 || {};
 })();
 
 DjangoSelect2.onjqueryload = (function($) {
-        $(document).ready(function() {
-            $('.django-select2').each(function(i, input) {
-                var $input = $(input);
-                if (DjangoSelect2.versionCompare(DjangoSelect2.jQuery.fn.jquery, '1.4.2') <= 0) {
-                    var optionsAttr = $input.attr('data-select2-options');
-                    if (optionsAttr) {
-                        $input.data('select2Options', $.parseJSON(optionsAttr));
-                    }
-                    var initSelectionUrlAttr = $input.attr('data-init-selection-url');
-                    if (initSelectionUrlAttr)
-                    $input.data('initSelectionUrl', initSelectionUrlAttr);
-                    var sortableAttr = $input.attr('data-sortable');
-                    if (sortableAttr) {
-                        $input.data('sortable', (sortableAttr == 'true'));
-                    }
-                }
 
-                var ajaxOptions = {
-                    ajax: {
-                        data: function(term, page) {
-                            return {
-                                q: term,
-                                page: page,
-                                page_limit: 10
-                            };
-                        },
-                        results: function(data, page) {
-                            return data;
-                        }
-                    },
-                    initSelection: function (element, callback) {
-                        var inputVal = $input.val();
-                        if (inputVal != '') {
-                            var data = {
-                                q: inputVal
-                            };
-                            var select2 = $input.data('select2') || {};
-                            if (typeof select2.opts == 'object' && select2.opts !== null) {
-                                data['multiple'] = (select2.opts.multiple) ? 1 : 0;
-                            }
-                            $.ajax({
-                                url: $input.data('initSelectionUrl'),
-                                dataType: 'json',
-                                data: data,
-                                success: function(data, textStatus, jqXHR) {
-                                    if (typeof(data) == 'object' && typeof(data.results) == 'object' && data.results) {
-                                        callback(data.results);
-                                    }
-                                }
-                            });
-                        }
-                    }
-                };
-                var options =  $input.data('select2Options') || {};
-                if (!options) {
-                    options = {};
-                }
-                if (options['ajax'] && typeof options['ajax'] == 'object') {
-                    options = $.extend(true, ajaxOptions, options);
-                }
-                $input.select2(options);
-                var isSortable = $input.data('sortable');
-                if (isSortable) {
-                    $input.select2("container").find("ul.select2-choices").sortable({
-                        containment: 'parent',
-                        start: function() { $input.select2("onSortStart"); },
-                        update: function() { $input.select2("onSortEnd"); }
-                    });
-                }
-            });
+
+    $(document).ready(function() {
+        $('.django-select2').each(function(i, input) {
+            var $input = $(input);
+            options = {};
+            $input.djselect2(options);
         });
     });
+});
 
 if (DjangoSelect2.jQueryObj) {
     DjangoSelect2.onjqueryload(DjangoSelect2.jQuery);
