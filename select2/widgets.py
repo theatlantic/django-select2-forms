@@ -48,6 +48,7 @@ class Select(widgets.Input):
 
     js_options = None
     sortable = False
+    is_hidden = False
     default_class = ('django-select2',)
     ajax = False
 
@@ -74,6 +75,10 @@ class Select(widgets.Input):
         self.attrs.update(attrs)
         self.choices = iter(choices)
 
+        # If widget is sortable, then we need to use a hidden element for it to work.
+        if self.sortable:
+            self.is_hidden = True
+
     def reverse(self, lookup_view):
         opts = getattr(self, 'model', self.field.model)._meta
         return reverse(lookup_view, kwargs={
@@ -97,7 +102,6 @@ class Select(widgets.Input):
             init_url = options.pop('init_url', self.reverse('select2_init_selection'))
             quiet_millis = options.pop('quietMillis', 100)
             is_jsonp = options.pop('jsonp', False)
-            is_hidden = options.pop('hidden', False)
 
             ajax_opts = options.get('ajax', {})
 
@@ -124,9 +128,8 @@ class Select(widgets.Input):
                 attrs.update({
                     'data-init-selection-url': init_url,
                 })
-            if is_hidden:
+            if self.is_hidden:
                 self.input_type = 'hidden'
-                self.is_hidden = True
             return super(Select, self).render(name, value, attrs=attrs)
         else:
             return self.render_select(name, value, attrs=attrs, choices=choices)
