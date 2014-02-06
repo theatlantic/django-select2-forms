@@ -85,15 +85,15 @@
             initSelection: function (element, callback) {
                 var inputVal = element.val();
                 if (inputVal != '') {
-                    var data = {
-                        q: inputVal
-                    };
                     var djselect2 = element.data('djselect2') || {};
                     var select2 = element.data('select2') || {};
                     var is_multiple = (typeof select2.opts == 'object' && select2.opts !== null) && select2.opts.multiple
 
                     // If an init_selection_url exists, peform an ajax request to retrieve the values.
                     if (djselect2.init_selection_url) {
+                        var data = {
+                            q: inputVal
+                        };
                         data['multiple'] = is_multiple ? 1 : 0;
 
                         $.ajax({
@@ -110,10 +110,15 @@
                     // No init_selection_url set so lets work with the values we have.
                     else {
                         var data = [];
+                        // If multiple then split using a comma.
                         if (is_multiple) {
-                            $(element.val().split(", ")).each(function () {
+                            $(inputVal.split(",")).each(function () {
                                 data.push({id: this, text: this});
                             });
+                        }
+                        // Otherwise, just set to the value of the field.
+                        else {
+                            data.push({id: inputVal, text: inputVal});
                         }
                         callback(data);
                     }
