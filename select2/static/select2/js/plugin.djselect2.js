@@ -43,7 +43,10 @@
         this._name = pluginName;
 
         this.set_ajax_options()
-        this.set_init_selection()
+
+        if (! this.element.is("select")) {
+          this.set_init_selection()
+        }
 
         this.init();
 
@@ -78,40 +81,47 @@
 
     Plugin.prototype.set_init_selection = function() {
 
-        // If ajax options were set in the input element, merge with our defaults.
-        if (this.init_selection_url) {
+        var defaults = {
+            initSelection: function (element, callback) {
+                var inputVal = element.val();
+                if (inputVal != '') {
+                    var data = {
+                        q: inputVal
+                    };
+                    var djselect2 = element.data('djselect2') || {};
+                    var select2 = element.data('select2') || {};
+                    var is_multiple = (typeof select2.opts == 'object' && select2.opts !== null) && select2.opts.multiple
 
-            var defaults = {
-                initSelection: function (element, callback) {
-                    var inputVal = element.val();
-                    if (inputVal != '') {
-                        var data = {
-                            q: inputVal
-                        };
-                        var djselect2 = element.data('djselect2') || {};
-                        var select2 = element.data('select2') || {};
+                    // If an init_selection_url exists, peform an ajax request to retrieve the values.
+                    if (djselect2.init_selection_url) {
+                        data['multiple'] = is_multiple ? 1 : 0;
 
-                        if (djselect2.init_selection_url) {
-                            if (typeof select2.opts == 'object' && select2.opts !== null) {
-                                data['multiple'] = (select2.opts.multiple) ? 1 : 0;
-                            }
-                            $.ajax({
-                                url: djselect2.init_selection_url,
-                                dataType: 'json',
-                                data: data,
-                                success: function(data, textStatus, jqXHR) {
-                                    if (typeof(data) == 'object' && typeof(data.results) == 'object' && data.results) {
-                                        callback(data.results);
-                                    }
+                        $.ajax({
+                            url: djselect2.init_selection_url,
+                            dataType: 'json',
+                            data: data,
+                            success: function(data, textStatus, jqXHR) {
+                                if (typeof(data) == 'object' && typeof(data.results) == 'object' && data.results) {
+                                    callback(data.results);
                                 }
+                            }
+                        });
+                    }
+                    // No init_selection_url set so lets work with the values we have.
+                    else {
+                        var data = [];
+                        if (is_multiple) {
+                            $(element.val().split(", ")).each(function () {
+                                data.push({id: this, text: this});
                             });
                         }
+                        callback(data);
                     }
                 }
-            };
+            }
+        };
 
-            this.options = $.extend(true, defaults, this.options);
-        }
+        this.options = $.extend(true, defaults, this.options);
     }
 
     Plugin.prototype.set_sortable = function() {
