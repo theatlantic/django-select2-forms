@@ -134,7 +134,7 @@ class Select(widgets.Input):
             'data-select2-options': json.dumps(options),
         })
 
-        if self.ajax:
+        if self.ajax or self.input_type in ['text', 'hidden']:
             if self.is_hidden:
                 self.input_type = 'hidden'
             return super(Select, self).render(name, value, attrs=attrs)

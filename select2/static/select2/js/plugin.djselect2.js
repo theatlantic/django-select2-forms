@@ -109,18 +109,19 @@
                     }
                     // No init_selection_url set so lets work with the values we have.
                     else {
-                        var data = [];
                         // If multiple then split using a comma.
                         if (is_multiple) {
+                            var data = [];
                             $(inputVal.split(",")).each(function () {
                                 data.push({id: this, text: this});
                             });
+                            callback(data);
                         }
                         // Otherwise, just set to the value of the field.
                         else {
-                            data.push({id: inputVal, text: inputVal});
+                            callback({id: inputVal, text: inputVal});
                         }
-                        callback(data);
+
                     }
                 }
             }
