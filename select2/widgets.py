@@ -197,6 +197,7 @@ class SelectMultiple(Select):
         return super(SelectMultiple, self)._has_changed(initial, data)
 
     def value_from_datadict(self, data, files, name):
-        if isinstance(data, (MultiValueDict, MergeDict)):
+        # Since ajax widgets use hidden or text input fields, when using ajax the value needs to be a string.
+        if not self.ajax and isinstance(data, (MultiValueDict, MergeDict)):
             return data.getlist(name)
         return data.get(name, None)
