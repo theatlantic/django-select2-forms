@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 urlpatterns = patterns('',
     url(r'^fetch_items/(?P<app_label>[^\/]+)/(?P<model_name>[^\/]+)/(?P<field_name>[^\/]+)/$',
