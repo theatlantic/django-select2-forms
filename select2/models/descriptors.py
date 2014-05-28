@@ -92,7 +92,23 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                 necessary in order for form widgets to display authors ordered by
                 position.
                 """
-                qset = super(ManyRelatedManager, self).get_query_set()
+                try:
+                    return self.instance._prefetched_objects_cache[self.prefetch_cache_name]
+                except (AttributeError, KeyError):
+                    qset = super(ManyRelatedManager, self).get_query_set()
+                    opts = self.through._meta
+                    # If the through table has Meta.ordering defined, order the objects
+                    # returned by the ManyRelatedManager by those fields.
+                    if self.field.sort_field_name:
+                        object_name = opts.object_name.lower()
+                        order_by = ['%s__%s' % (object_name, self.field.sort_field_name)]
+                        if self.model._meta.ordering != order_by:
+                            return qset.order_by(*order_by)
+                    return qset
+
+            def get_prefetch_query_set(self, instances):
+                rel_qs, rel_obj_attr, instance_attr, single, cache_name = \
+                    super(ManyRelatedManager, self).get_prefetch_query_set(instances)
                 opts = self.through._meta
                 # If the through table has Meta.ordering defined, order the objects
                 # returned by the ManyRelatedManager by those fields.
@@ -100,8 +116,8 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                     object_name = opts.object_name.lower()
                     order_by = ['%s__%s' % (object_name, self.field.sort_field_name)]
                     if self.model._meta.ordering != order_by:
-                        return qset.order_by(*order_by)
-                return qset
+                        rel_qs = rel_qs.order_by(*order_by)
+                return (rel_qs, rel_obj_attr, instance_attr, single, cache_name)
 
         ManyRelatedManager.field = self.field
         return ManyRelatedManager
