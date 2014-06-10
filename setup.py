@@ -18,7 +18,7 @@ except IOError:
 
 setup(
     name='django-select2-forms',
-    version=__import__('select2').__version__,
+    version='1.1.15',
     description='Django form fields using the Select2 jQuery plugin',
     author='Frankie Dintino',
     author_email='fdintino@theatlantic.com',
