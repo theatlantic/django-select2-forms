@@ -38,7 +38,15 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                             if not router.allow_relation(obj, self.instance):
                                 raise ValueError('Cannot add "%r": instance is on database "%s", value is on database "%s"' %
                                                    (obj, self.instance._state.db, obj._state.db))
-                            new_ids.add(obj.pk)
+                            # _get_fk_val wasn't introduced until django 1.4.2
+                            if hasattr(self, '_get_fk_val'):
+                                fk_val = self._get_fk_val(obj, target_field_name)
+                            else:
+                                fk_val = obj.pk
+                            if fk_val is None:
+                                raise ValueError('Cannot add "%r": the value for field "%s" is None' %
+                                                 (obj, target_field_name))
+                            new_ids.add(fk_val)
                         elif isinstance(obj, Model):
                             raise TypeError("'%s' instance expected, got %r" % (self.model._meta.object_name, obj))
                         else:
@@ -46,7 +54,7 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                     db = router.db_for_write(self.through, instance=self.instance)
                     vals = self.through._default_manager.using(db).values_list(target_field_name, flat=True)
                     vals = vals.filter(**{
-                        source_field_name: self._pk_val,
+                        source_field_name: getattr(self, '_pk_val', getattr(self, '_fk_val', None)),
                         '%s__in' % target_field_name: new_ids,
                     })
                     new_ids = new_ids - set(vals)
@@ -69,7 +77,7 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                         sort_position = getattr(obj, sort_field_attname)
                         new_obj, created = self.through._default_manager.using(db).get_or_create(**{
                             sort_field_attname: sort_position,
-                            '%s_id' % source_field_name: self._pk_val,
+                            '%s_id' % source_field_name: getattr(self, '_pk_val', getattr(self, '_fk_val', None)),
                             '%s_id' % target_field_name: obj.pk,
                         })
                         if getattr(new_obj, sort_field_attname) is not sort_position:
