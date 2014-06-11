@@ -1,6 +1,7 @@
 from itertools import chain
 import json
 
+import django
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.forms import widgets
@@ -192,9 +193,11 @@ class SelectMultiple(Select):
             value = u','.join([force_unicode(v) for v in value])
         return value
 
-    def _has_changed(self, initial, data):
-        initial = self._format_value(initial)
-        return super(SelectMultiple, self)._has_changed(initial, data)
+    # Restrict defining the _has_changed method to earlier than Django 1.6.
+    if django.VERSION < (1, 6):
+        def _has_changed(self, initial, data):
+            initial = self._format_value(initial)
+            return super(SelectMultiple, self)._has_changed(initial, data)
 
     def value_from_datadict(self, data, files, name):
         # Since ajax widgets use hidden or text input fields, when using ajax the value needs to be a string.
