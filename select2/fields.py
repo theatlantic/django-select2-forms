@@ -73,6 +73,8 @@ class Select2ModelFieldMixin(Select2FieldMixin):
         if hasattr(self, '_choices'):
             return self._choices
         return self.choice_iterator_cls(self)
+    
+    choices = property(_get_choices, forms.ChoiceField._set_choices)
 
 
 class ModelChoiceField(Select2ModelFieldMixin, forms.ModelChoiceField):
