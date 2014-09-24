@@ -29,8 +29,7 @@ class JsonResponse(HttpResponse):
         if self.callback is not None:
             content = u"%s(\n%s\n)" % (self.callback, content)
             mimetype = "text/javascript"
-        return super(JsonResponse, self).__init__(content=content,
-            mimetype=mimetype, *args, **kwargs)
+        super(JsonResponse, self).__init__(content=content, mimetype=mimetype, *args, **kwargs)
 
 
 class Select2View(object):
