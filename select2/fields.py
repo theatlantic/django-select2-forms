@@ -244,6 +244,16 @@ class ForeignKey(RelatedFieldMixin, models.ForeignKey):
         return super(ForeignKey, self).formfield(**defaults)
 
 
+class OneToOneField(RelatedFieldMixin, models.OneToOneField):
+
+    def formfield(self, **kwargs):
+        defaults = {
+            'to_field_name': self.rel.field_name,
+        }
+        defaults.update(**kwargs)
+        return super(OneToOneField, self).formfield(**defaults)
+
+
 class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
 
     #: Name of the field on the through table used for storing sort position
@@ -294,3 +304,6 @@ else:
     add_introspection_rules(rules=[
         ((ForeignKey,), [], {"search_field": ["search_field", {}]}),
     ], patterns=["^select2\.fields\.ForeignKey"])
+    add_introspection_rules(rules=[
+        ((OneToOneField,), [], {"search_field": ["search_field", {}]}),
+    ], patterns=["^select2\.fields\.OneToOneField"])
