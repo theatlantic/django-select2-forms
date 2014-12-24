@@ -1,29 +1,16 @@
 #!/usr/bin/env python
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages
+from setuptools import setup, find_packages
 
-
-setup_kwargs = {}
-
-try:
-    setup_kwargs['long_description'] = open('README.rst').read()
-except IOError:
-    # Use the create_readme_rst command to convert README to reStructuredText
-    pass
 
 setup(
-    name='django-select2-forms',
-    version='1.1.19',
-    description='Django form fields using the Select2 jQuery plugin',
-    author='Frankie Dintino',
-    author_email='fdintino@theatlantic.com',
-    url='https://github.com/theatlantic/django-select2-forms',
+    # Base information
+    name="django-select2-forms",
+    version="1.2",
     packages=find_packages(),
+
+    # Pypi Information
+    description="Django form fields using the Select2 jQuery plugin.",
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
@@ -31,11 +18,17 @@ setup(
         'Programming Language :: Python',
         'Framework :: Django',
     ],
+    license="BSD",
+    author="Frankie Dintino, Joshua Ellis, and more",
+    url="https://github.com/JP-Ellis/django-select2-forms",
+
+    # Setup dependencies
+    setup_requires=["setuptools_markdown"],
+    long_description_markdown_filename="README.md",
+
+    # Dependencies
+    install_requires=["django>=1.5"],
+
+    # We also want to include the static files.
     include_package_data=True,
-    zip_safe=False,
-    entry_points={
-        'distutils.commands': [
-            'create_readme_rst = select2.build:create_readme_rst',
-        ],
-    },
-    **setup_kwargs)
+)
