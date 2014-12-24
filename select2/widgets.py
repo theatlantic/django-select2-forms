@@ -24,6 +24,7 @@ class Select(widgets.Input):
     class Media:
         js = (
             "%s%s?v=2" % (settings.STATIC_URL, "select2/js/select2.jquery_ready.js"),
+            "%s%s?v=1" % (settings.STATIC_URL, "select2/js/plugin.djselect2.js"),
             "%s%s?v=1" % (settings.STATIC_URL, "select2/js/select2.js"),
         )
         css = {
@@ -47,6 +48,7 @@ class Select(widgets.Input):
 
     js_options = None
     sortable = False
+    is_hidden = False
     default_class = ('django-select2',)
     ajax = False
 
@@ -73,13 +75,21 @@ class Select(widgets.Input):
         self.attrs.update(attrs)
         self.choices = iter(choices)
 
+        # If widget is sortable, then we need to use a hidden element for it to work.
+        if self.sortable:
+            self.is_hidden = True
+
     def reverse(self, lookup_view):
-        opts = getattr(self, 'model', self.field.model)._meta
-        return reverse(lookup_view, kwargs={
-            'app_label': opts.app_label,
-            'model_name': opts.object_name.lower(),
-            'field_name': self.field.name,
-        })
+        try:
+            opts = getattr(self, 'model', self.field.model)._meta
+            return reverse(lookup_view, kwargs={
+                'app_label': opts.app_label,
+                'model_name': opts.object_name.lower(),
+                'field_name': self.field.name,
+            })
+        except AttributeError:
+            pass
+
 
     def render(self, name, value, attrs=None, choices=(), js_options=None):
         options = {}
@@ -93,6 +103,9 @@ class Select(widgets.Input):
 
         if self.ajax:
             ajax_url = options.pop('ajax_url', None)
+            ajax_init = options.pop('ajax_init', True)
+            init_url = options.pop('init_url', None)
+
             quiet_millis = options.pop('quietMillis', 100)
             is_jsonp = options.pop('jsonp', False)
 
@@ -109,6 +122,11 @@ class Select(widgets.Input):
                 default_ajax_opts[k] = v
             options['ajax'] = default_ajax_opts
 
+            if ajax_init:
+                attrs.update({
+                    'data-init-selection-url': init_url or self.reverse('select2_init_selection'),
+                })
+
         if not self.is_required:
             options.update({'allowClear': options.get('allowClear', True)})
 
@@ -116,12 +134,9 @@ class Select(widgets.Input):
             'data-select2-options': json.dumps(options),
         })
 
-        if self.ajax:
-            attrs.update({
-                'data-init-selection-url': self.reverse('select2_init_selection'),
-            })
-            self.input_type = 'hidden'
-            self.is_hidden = True
+        if self.ajax or self.input_type in ['text', 'hidden']:
+            if self.is_hidden:
+                self.input_type = 'hidden'
             return super(Select, self).render(name, value, attrs=attrs)
         else:
             return self.render_select(name, value, attrs=attrs, choices=choices)
