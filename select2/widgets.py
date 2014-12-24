@@ -4,7 +4,6 @@ from itertools import chain
 import json
 
 import django
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.forms import widgets
 from django.forms.util import flatatt
@@ -15,6 +14,7 @@ from django.utils.html import escape, conditional_escape
 from django.utils.safestring import mark_safe
 
 from .utils import combine_css_classes
+from .select2 import jquery_url, select2_js_url, djselect2_js_url, select2_css_url
 
 
 __all__ = ('Select', 'SelectMultiple',)
@@ -26,14 +26,13 @@ class Select(widgets.Input):
 
     class Media:
         js = (
-            "%s%s?v=2" % (settings.STATIC_URL, "select2/js/select2.jquery_ready.js"),
-            "%s%s?v=1" % (settings.STATIC_URL, "select2/js/plugin.djselect2.js"),
-            "%s%s?v=1" % (settings.STATIC_URL, "select2/js/select2.js"),
+            jquery_url(),
+            select2_js_url(),
+            djselect2_js_url()
         )
         css = {
             "all": (
-                "%s%s?v=1" % (settings.STATIC_URL, "select2/css/select2.css"),
-                "%s%s?v=2" % (settings.STATIC_URL, "select2/css/djselect2.css"),
+                select2_css_url(),
             )}
 
     js_options_map = {
