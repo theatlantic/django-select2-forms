@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import sys
 
 from django.db import models
@@ -36,7 +38,8 @@ class SortableThroughModelBase(ModelBase):
         else:
             meta = attr_meta
         if meta is None:
-            class Meta: pass
+            class Meta:
+                pass
             meta = Meta
             meta.__module__ = module
 

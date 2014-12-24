@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django.db import router
 from django.db.models import signals
 from django.db.models.fields.related import ReverseManyRelatedObjectsDescriptor
@@ -36,8 +38,9 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                     for obj in objs:
                         if isinstance(obj, self.model):
                             if not router.allow_relation(obj, self.instance):
-                                raise ValueError('Cannot add "%r": instance is on database "%s", value is on database "%s"' %
-                                                   (obj, self.instance._state.db, obj._state.db))
+                                raise ValueError(
+                                    'Cannot add "%r": instance is on database "%s", value is on database "%s"' %
+                                    (obj, self.instance._state.db, obj._state.db))
                             # _get_fk_val wasn't introduced until django 1.4.2
                             if hasattr(self, '_get_fk_val'):
                                 fk_val = self._get_fk_val(obj, target_field_name)
@@ -62,9 +65,14 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                     if self.reverse or source_field_name == self.source_field_name:
                         # Don't send the signal when we are inserting the
                         # duplicate data row for symmetrical reverse entries.
-                        signals.m2m_changed.send(sender=self.through, action='pre_add',
-                            instance=self.instance, reverse=self.reverse,
-                            model=self.model, pk_set=new_ids, using=db)
+                        signals.m2m_changed.send(
+                            sender=self.through,
+                            action='pre_add',
+                            instance=self.instance,
+                            reverse=self.reverse,
+                            model=self.model,
+                            pk_set=new_ids,
+                            using=db)
 
                     ######################################################################
                     # This is where we modify the default logic for _add_items().
@@ -90,9 +98,14 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                     if self.reverse or source_field_name == self.source_field_name:
                         # Don't send the signal when we are inserting the
                         # duplicate data row for symmetrical reverse entries.
-                        signals.m2m_changed.send(sender=self.through, action='post_add',
-                            instance=self.instance, reverse=self.reverse,
-                            model=self.model, pk_set=new_ids, using=db)
+                        signals.m2m_changed.send(
+                            sender=self.through,
+                            action='post_add',
+                            instance=self.instance,
+                            reverse=self.reverse,
+                            model=self.model,
+                            pk_set=new_ids,
+                            using=db)
 
             def get_query_set(self):
                 """

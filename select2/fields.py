@@ -1,10 +1,13 @@
+from __future__ import unicode_literals
+
 from django import forms
-from django.db import models
 from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.db import models
 from django.db.models.fields import FieldDoesNotExist
-from django.forms.models import ModelChoiceIterator
-from django.utils.encoding import force_unicode
 from django.db.models.fields.related import add_lazy_relation
+from django.forms.models import ModelChoiceIterator
+from django.utils import six
+from django.utils.encoding import force_text
 
 from .models.descriptors import SortableReverseManyRelatedObjectsDescriptor
 from .widgets import Select, SelectMultiple
@@ -106,7 +109,7 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, forms.ModelMultipleChoice
         elif not self.required and not value:
             return []
 
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             value = value.split(',')
 
         if not isinstance(value, (list, tuple)):
@@ -122,14 +125,14 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, forms.ModelMultipleChoice
         qs = self.queryset.filter(**{
             ('%s__in' % key): value,
         })
-        pks = set([force_unicode(getattr(o, key)) for o in qs])
+        pks = set([force_text(getattr(o, key)) for o in qs])
 
         # Create a dictionary for storing the original order of the items
         # passed from the form
         pk_positions = {}
 
         for i, val in enumerate(value):
-            pk = force_unicode(val)
+            pk = force_text(val)
             if pk not in pks:
                 raise ValidationError(self.error_messages['invalid_choice'] % val)
             pk_positions[pk] = i
@@ -143,7 +146,7 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, forms.ModelMultipleChoice
             sort_field_name = self.sort_field.name
             objs = []
             for i, obj in enumerate(qs):
-                pk = force_unicode(getattr(obj, key))
+                pk = force_text(getattr(obj, key))
                 setattr(obj, sort_field_name, pk_positions[pk])
                 objs.append(obj)
             sorted(objs, key=lambda obj: getattr(obj, sort_field_name))
@@ -210,7 +213,7 @@ class RelatedFieldMixin(object):
                     'field_name': self.name,
                     'app_label': self.model._meta.app_label,
                     'object_name': self.model._meta.object_name})
-        if not callable(self.search_field) and not isinstance(self.search_field, basestring):
+        if not callable(self.search_field) and not isinstance(self.search_field, six.string_types):
             raise TypeError(
                 ("keyword argument 'search_field' must be either callable or "
                  "string on field '%(field_name)s' of model "
@@ -218,7 +221,7 @@ class RelatedFieldMixin(object):
                     'field_name': self.name,
                     'app_label': self.model._meta.app_label,
                     'object_name': self.model._meta.object_name})
-        if isinstance(self.search_field, basestring):
+        if isinstance(self.search_field, six.string_types):
             opts = related.parent_model._meta
             try:
                 opts.get_field(self.search_field)
@@ -264,7 +267,7 @@ class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
 
     def __init__(self, *args, **kwargs):
         self.sort_field_name = kwargs.pop('sort_field', self.sort_field_name)
-        help_text = kwargs.get('help_text', u'')
+        help_text = kwargs.get('help_text', '')
         super(ManyToManyField, self).__init__(*args, **kwargs)
         self.help_text = help_text
 
@@ -284,7 +287,7 @@ class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
         if self.sort_field_name is not None:
             def resolve_sort_field(field, model, cls):
                 field.sort_field = model._meta.get_field(field.sort_field_name)
-            if isinstance(self.rel.through, basestring):
+            if isinstance(self.rel.through, six.string_types):
                 add_lazy_relation(cls, self, self.rel.through, resolve_sort_field)
             else:
                 resolve_sort_field(self, self.rel.through, cls)
