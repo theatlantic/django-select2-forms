@@ -1,4 +1,5 @@
 """Provides the entrypoint in setup.py for the create_readme_rst command"""
+from __future__ import unicode_literals
 
 import os
 import codecs
@@ -12,9 +13,12 @@ class create_readme_rst(setuptools.Command):
 
     description = "Convert README.md to README.rst"
     user_options = []
-    
-    def initialize_options(self): pass
-    def finalize_options(self): pass
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
 
     def run(self):
         converter = PandocRSTConverter()
@@ -24,7 +28,7 @@ class create_readme_rst(setuptools.Command):
         api_link = ("`Read API documentation on github "
                     "<https://github.com/theatlantic/django-select2-forms"
                     "#api-documentation>`_")
-        rst = converter.replace_section(rst, u'API Documentation', api_link)
+        rst = converter.replace_section(rst, 'API Documentation', api_link)
 
         outfile = os.path.join(os.path.dirname(__file__), '..', '..', 'README.rst')
         with codecs.open(outfile, encoding='utf8', mode='w') as f:

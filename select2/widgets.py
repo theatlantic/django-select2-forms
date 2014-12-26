@@ -1,17 +1,20 @@
+from __future__ import unicode_literals
+
 from itertools import chain
 import json
 
 import django
 from django.core.urlresolvers import reverse
-from django.conf import settings
 from django.forms import widgets
 from django.forms.util import flatatt
+from django.utils import six
 from django.utils.datastructures import MultiValueDict, MergeDict
+from django.utils.encoding import force_text
 from django.utils.html import escape, conditional_escape
-from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 
 from .utils import combine_css_classes
+from .select2 import jquery_url, select2_js_url, djselect2_js_url, select2_css_url
 
 
 __all__ = ('Select', 'SelectMultiple',)
@@ -23,13 +26,13 @@ class Select(widgets.Input):
 
     class Media:
         js = (
-            "%s%s?v=2" % (settings.STATIC_URL, "select2/js/select2.jquery_ready.js"),
-            "%s%s?v=1" % (settings.STATIC_URL, "select2/js/select2.js"),
+            jquery_url(),
+            select2_js_url(),
+            djselect2_js_url()
         )
         css = {
             "all": (
-                "%s%s?v=1" % (settings.STATIC_URL, "select2/css/select2.css"),
-                "%s%s?v=2" % (settings.STATIC_URL, "select2/css/djselect2.css"),
+                select2_css_url(),
             )}
 
     js_options_map = {
@@ -47,6 +50,7 @@ class Select(widgets.Input):
 
     js_options = None
     sortable = False
+    is_hidden = False
     default_class = ('django-select2',)
     ajax = False
 
@@ -54,7 +58,7 @@ class Select(widgets.Input):
         self.ajax = kwargs.pop('ajax', self.ajax)
         self.js_options = {}
         if js_options is not None:
-            for k, v in js_options.iteritems():
+            for k, v in six.iteritems(js_options):
                 if k in self.js_options_map:
                     k = self.js_options_map[k]
                 self.js_options[k] = v
@@ -73,26 +77,36 @@ class Select(widgets.Input):
         self.attrs.update(attrs)
         self.choices = iter(choices)
 
+        # If widget is sortable, then we need to use a hidden element for it to work.
+        if self.sortable:
+            self.is_hidden = True
+
     def reverse(self, lookup_view):
-        opts = getattr(self, 'model', self.field.model)._meta
-        return reverse(lookup_view, kwargs={
-            'app_label': opts.app_label,
-            'model_name': opts.object_name.lower(),
-            'field_name': self.field.name,
-        })
+        try:
+            opts = getattr(self, 'model', self.field.model)._meta
+            return reverse(lookup_view, kwargs={
+                'app_label': opts.app_label,
+                'model_name': opts.object_name.lower(),
+                'field_name': self.field.name,
+            })
+        except AttributeError:
+            pass
 
     def render(self, name, value, attrs=None, choices=(), js_options=None):
         options = {}
         attrs = attrs or {}
         js_options = js_options or {}
 
-        for k, v in dict(self.js_options, **js_options).iteritems():
+        for k, v in six.iteritems(dict(self.js_options, **js_options)):
             if k in self.js_options_map:
                 k = self.js_options_map[k]
             options[k] = v
 
         if self.ajax:
             ajax_url = options.pop('ajax_url', None)
+            ajax_init = options.pop('ajax_init', True)
+            init_url = options.pop('init_url', None)
+
             quiet_millis = options.pop('quietMillis', 100)
             is_jsonp = options.pop('jsonp', False)
 
@@ -103,11 +117,16 @@ class Select(widgets.Input):
                 'dataType': 'jsonp' if is_jsonp else 'json',
                 'quietMillis': quiet_millis,
             }
-            for k, v in ajax_opts.iteritems():
+            for k, v in six.iteritems(ajax_opts):
                 if k in self.js_options_map:
                     k = self.js_options_map[k]
                 default_ajax_opts[k] = v
             options['ajax'] = default_ajax_opts
+
+            if ajax_init:
+                attrs.update({
+                    'data-init-selection-url': init_url or self.reverse('select2_init_selection'),
+                })
 
         if not self.is_required:
             options.update({'allowClear': options.get('allowClear', True)})
@@ -116,12 +135,9 @@ class Select(widgets.Input):
             'data-select2-options': json.dumps(options),
         })
 
-        if self.ajax:
-            attrs.update({
-                'data-init-selection-url': self.reverse('select2_init_selection'),
-            })
-            self.input_type = 'hidden'
-            self.is_hidden = True
+        if self.ajax or self.input_type in ['text', 'hidden']:
+            if self.is_hidden:
+                self.input_type = 'hidden'
             return super(Select, self).render(name, value, attrs=attrs)
         else:
             return self.render_select(name, value, attrs=attrs, choices=choices)
@@ -130,41 +146,41 @@ class Select(widgets.Input):
         if value is None:
             value = ''
         final_attrs = self.build_attrs(attrs, name=name)
-        output = [u'<select%s>' % flatatt(final_attrs)]
+        output = ['<select%s>' % flatatt(final_attrs)]
         if not isinstance(value, (list, tuple)):
             value = [value]
         options = self.render_options(choices, value)
         if options:
             output.append(options)
-        output.append(u'</select>')
-        return mark_safe(u'\n'.join(output))
+        output.append('</select>')
+        return mark_safe('\n'.join(output))
 
     def render_option(self, selected_choices, option_value, option_label):
-        option_value = force_unicode(option_value)
+        option_value = force_text(option_value)
         if option_value in selected_choices:
-            selected_html = u' selected="selected"'
+            selected_html = ' selected="selected"'
             if not self.allow_multiple_selected:
                 # Only allow for a single selection.
                 selected_choices.remove(option_value)
         else:
             selected_html = ''
-        return u'<option value="%s"%s>%s</option>' % (
+        return '<option value="%s"%s>%s</option>' % (
             escape(option_value), selected_html,
-            conditional_escape(force_unicode(option_label)))
+            conditional_escape(force_text(option_label)))
 
     def render_options(self, choices, selected_choices):
         # Normalize to strings.
-        selected_choices = set(force_unicode(v) for v in selected_choices)
+        selected_choices = set(force_text(v) for v in selected_choices)
         output = []
         for option_value, option_label in chain(self.choices, choices):
             if isinstance(option_label, (list, tuple)):
-                output.append(u'<optgroup label="%s">' % escape(force_unicode(option_value)))
+                output.append('<optgroup label="%s">' % escape(force_text(option_value)))
                 for option in option_label:
                     output.append(self.render_option(selected_choices, *option))
-                output.append(u'</optgroup>')
+                output.append('</optgroup>')
             else:
                 output.append(self.render_option(selected_choices, option_value, option_label))
-        return u'\n'.join(output)
+        return '\n'.join(output)
 
 
 class SelectMultiple(Select):
@@ -176,7 +192,7 @@ class SelectMultiple(Select):
         default_attrs = {}
         ajax = kwargs.get('ajax', self.ajax)
         if ajax:
-            options.update({'multiple': True,})
+            options.update({'multiple': True})
         else:
             default_attrs.update({
                 'multiple': 'multiple',
@@ -185,12 +201,15 @@ class SelectMultiple(Select):
         if js_options is not None:
             options.update(js_options)
 
-        super(SelectMultiple, self).__init__(attrs=attrs, choices=choices,
-                js_options=options, *args, **kwargs)
+        super(SelectMultiple, self).__init__(
+            attrs=attrs,
+            choices=choices,
+            js_options=options,
+            *args, **kwargs)
 
     def _format_value(self, value):
         if isinstance(value, list):
-            value = u','.join([force_unicode(v) for v in value])
+            value = ','.join([force_text(v) for v in value])
         return value
 
     # Restrict defining the _has_changed method to earlier than Django 1.6.

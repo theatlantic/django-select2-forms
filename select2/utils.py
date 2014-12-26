@@ -1,7 +1,11 @@
+from __future__ import unicode_literals
+
 import re
 
+from django.utils import six
 
-re_spaces = re.compile(ur"\s+")
+
+re_spaces = re.compile(r"\s+")
 
 
 class cached_property(object):
@@ -20,15 +24,15 @@ class cached_property(object):
 
 def combine_css_classes(classes, new_classes):
     if not classes:
-        if isinstance(new_classes, basestring):
+        if isinstance(new_classes, six.string_types):
             return new_classes
         else:
             try:
-                return u" ".join(new_classes)
+                return " ".join(new_classes)
             except TypeError:
                 return new_classes
 
-    if isinstance(classes, basestring):
+    if isinstance(classes, six.string_types):
         classes = set(re_spaces.split(classes))
     else:
         try:
@@ -36,12 +40,12 @@ def combine_css_classes(classes, new_classes):
         except TypeError:
             return classes
 
-    if isinstance(new_classes, basestring):
+    if isinstance(new_classes, six.string_types):
         new_classes = set(re_spaces.split(new_classes))
     else:
         try:
             new_classes = set(new_classes)
         except TypeError:
-            return u" ".join(classes)
+            return " ".join(classes)
 
-    return u" ".join(classes.union(new_classes))
+    return " ".join(classes.union(new_classes))
