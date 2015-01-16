@@ -21,16 +21,16 @@ class JsonResponse(HttpResponse):
 
     callback = None
 
-    def __init__(self, content='', callback=None, mimetype="application/json", *args, **kwargs):
+    def __init__(self, content='', callback=None, content_type="application/json", *args, **kwargs):
         if not isinstance(content, basestring):
             content = json.dumps(content)
         if callback is not None:
             self.callback = callback
         if self.callback is not None:
             content = u"%s(\n%s\n)" % (self.callback, content)
-            mimetype = "text/javascript"
+            content_type= "text/javascript"
         return super(JsonResponse, self).__init__(content=content,
-            mimetype=mimetype, *args, **kwargs)
+            content_type=content_type, *args, **kwargs)
 
 
 class Select2View(object):
