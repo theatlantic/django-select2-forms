@@ -1,3 +1,4 @@
+import django
 from django.db import router
 from django.db.models import signals
 from django.db.models.fields.related import ReverseManyRelatedObjectsDescriptor
@@ -54,7 +55,7 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                     db = router.db_for_write(self.through, instance=self.instance)
                     vals = self.through._default_manager.using(db).values_list(target_field_name, flat=True)
                     vals = vals.filter(**{
-                        source_field_name: getattr(self, '_pk_val', getattr(self, '_fk_val', None)),
+                        source_field_name: getattr(self, '_pk_val', getattr(self, '_fk_val', self.instance.pk)),
                         '%s__in' % target_field_name: new_ids,
                     })
                     new_ids = new_ids - set(vals)
@@ -77,7 +78,7 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                         sort_position = getattr(obj, sort_field_attname)
                         new_obj, created = self.through._default_manager.using(db).get_or_create(**{
                             sort_field_attname: sort_position,
-                            '%s_id' % source_field_name: getattr(self, '_pk_val', getattr(self, '_fk_val', None)),
+                            '%s_id' % source_field_name: getattr(self, '_pk_val', getattr(self, '_fk_val', self.instance.pk)),
                             '%s_id' % target_field_name: obj.pk,
                         })
                         if getattr(new_obj, sort_field_attname) is not sort_position:
@@ -94,16 +95,19 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                             instance=self.instance, reverse=self.reverse,
                             model=self.model, pk_set=new_ids, using=db)
 
-            def get_query_set(self):
+            def get_queryset(self):
                 """
-                Adds ordering to ManyRelatedManager.get_query_set(). This is
+                Adds ordering to ManyRelatedManager.get_queryset(). This is
                 necessary in order for form widgets to display authors ordered by
                 position.
                 """
                 try:
                     return self.instance._prefetched_objects_cache[self.prefetch_cache_name]
                 except (AttributeError, KeyError):
-                    qset = super(ManyRelatedManager, self).get_query_set()
+                    if django.VERSION < (1, 7):
+                        qset = super(ManyRelatedManager, self).get_query_set()
+                    else:
+                        qset = super(ManyRelatedManager, self).get_queryset()
                     opts = self.through._meta
                     # If the through table has Meta.ordering defined, order the objects
                     # returned by the ManyRelatedManager by those fields.
@@ -114,9 +118,16 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                             return qset.order_by(*order_by)
                     return qset
 
-            def get_prefetch_query_set(self, instances, *args):
-                rel_qs, rel_obj_attr, instance_attr, single, cache_name = \
-                    super(ManyRelatedManager, self).get_prefetch_query_set(instances, *args)
+            if django.VERSION < (1, 7):
+                get_query_set = get_queryset
+
+            def get_prefetch_queryset(self, instances, *args):
+                if django.VERSION < (1, 7):
+                    rel_qs, rel_obj_attr, instance_attr, single, cache_name = \
+                        super(ManyRelatedManager, self).get_prefetch_query_set(instances, *args)
+                else:
+                    rel_qs, rel_obj_attr, instance_attr, single, cache_name = \
+                        super(ManyRelatedManager, self).get_prefetch_queryset(instances, *args)
                 opts = self.through._meta
                 # If the through table has Meta.ordering defined, order the objects
                 # returned by the ManyRelatedManager by those fields.
@@ -126,6 +137,9 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                     if self.model._meta.ordering != order_by:
                         rel_qs = rel_qs.order_by(*order_by)
                 return (rel_qs, rel_obj_attr, instance_attr, single, cache_name)
+
+            if django.VERSION < (1, 7):
+                get_prefetch_query_set = get_prefetch_queryset
 
         ManyRelatedManager.field = self.field
         return ManyRelatedManager
