@@ -52,7 +52,11 @@ class SortableThroughModelBase(ModelBase):
         # Create a callbable using closure variables that returns
         # get_model() for this model
         def get_model():
-            return models.get_model(app_label, name, False)
+            try:
+                return models.get_model(app_label, name, False)
+            except TypeError:
+                # Django 1.7+
+                return models.get_model(app_label, name)
         # Pass the callable to SimpleLazyObject
         lazy_model = SimpleLazyObject(get_model)
         # And set the auto_created to a lazy-loaded model object

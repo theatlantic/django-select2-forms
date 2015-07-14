@@ -114,9 +114,9 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescr
                             return qset.order_by(*order_by)
                     return qset
 
-            def get_prefetch_query_set(self, instances):
+            def get_prefetch_query_set(self, instances, *args):
                 rel_qs, rel_obj_attr, instance_attr, single, cache_name = \
-                    super(ManyRelatedManager, self).get_prefetch_query_set(instances)
+                    super(ManyRelatedManager, self).get_prefetch_query_set(instances, *args)
                 opts = self.through._meta
                 # If the through table has Meta.ordering defined, order the objects
                 # returned by the ManyRelatedManager by those fields.
