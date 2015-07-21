@@ -51,7 +51,10 @@ class MultipleChoiceField(Select2FieldMixin, forms.MultipleChoiceField):
     widget = SelectMultiple
 
     def has_changed(self, initial, data):
-        initial = self.widget._format_value(initial)
+        widget = self.widget
+        if not isinstance(widget, SelectMultiple) and hasattr(widget, 'widget'):
+            widget = widget.widget
+        initial = widget._format_value(initial)
         if django.VERSION < (1, 8):
             return super(MultipleChoiceField, self)._has_changed(initial, data)
         else:
@@ -164,7 +167,10 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, forms.ModelMultipleChoice
         return super(ModelMultipleChoiceField, self).prepare_value(value)
 
     def has_changed(self, initial, data):
-        initial = self.widget._format_value(initial)
+        widget = self.widget
+        if not isinstance(widget, SelectMultiple) and hasattr(widget, 'widget'):
+            widget = widget.widget
+        initial = widget._format_value(initial)
         if django.VERSION < (1, 8):
             return super(ModelMultipleChoiceField, self)._has_changed(initial, data)
         else:
