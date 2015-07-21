@@ -1,3 +1,4 @@
+import django
 from django import forms
 from django.db import models
 from django.core.exceptions import ImproperlyConfigured, ValidationError
@@ -48,6 +49,16 @@ class ChoiceField(Select2FieldMixin, forms.ChoiceField):
 class MultipleChoiceField(Select2FieldMixin, forms.MultipleChoiceField):
 
     widget = SelectMultiple
+
+    def has_changed(self, initial, data):
+        initial = self.widget._format_value(initial)
+        if django.VERSION < (1, 8):
+            return super(MultipleChoiceField, self)._has_changed(initial, data)
+        else:
+            return super(MultipleChoiceField, self).has_changed(initial, data)
+
+    if django.VERSION < (1, 8):
+        _has_changed = has_changed
 
 
 class Select2ModelFieldMixin(Select2FieldMixin):
@@ -151,6 +162,16 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, forms.ModelMultipleChoice
 
     def prepare_value(self, value):
         return super(ModelMultipleChoiceField, self).prepare_value(value)
+
+    def has_changed(self, initial, data):
+        initial = self.widget._format_value(initial)
+        if django.VERSION < (1, 8):
+            return super(ModelMultipleChoiceField, self)._has_changed(initial, data)
+        else:
+            return super(ModelMultipleChoiceField, self).has_changed(initial, data)
+
+    if django.VERSION < (1, 8):
+        _has_changed = has_changed
 
 
 class RelatedFieldMixin(object):
