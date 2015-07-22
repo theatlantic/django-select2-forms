@@ -246,7 +246,11 @@ class RelatedFieldMixin(object):
                     'app_label': self.model._meta.app_label,
                     'object_name': self.model._meta.object_name})
         if isinstance(self.search_field, basestring):
-            opts = related.parent_model._meta
+            try:
+                opts = related.parent_model._meta
+            except AttributeError:
+                # Django 1.8
+                opts = related.model._meta
             try:
                 opts.get_field(self.search_field)
             except FieldDoesNotExist:

@@ -121,7 +121,8 @@ class Select(widgets.Input):
                 'data-init-selection-url': self.reverse('select2_init_selection'),
             })
             self.input_type = 'hidden'
-            self.is_hidden = True
+            if django.VERSION < (1, 7):
+                self.is_hidden = True
             return super(Select, self).render(name, value, attrs=attrs)
         else:
             return self.render_select(name, value, attrs=attrs, choices=choices)
