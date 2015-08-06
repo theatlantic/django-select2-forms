@@ -1,6 +1,12 @@
 import sys
 
 from django.db import models
+try:
+    from django.apps import apps
+except ImportError:
+    from django.db.models.loading import get_model
+else:
+    get_model = apps.get_model
 from django.db.models.base import ModelBase
 from django.utils.functional import SimpleLazyObject
 
@@ -51,14 +57,14 @@ class SortableThroughModelBase(ModelBase):
 
         # Create a callbable using closure variables that returns
         # get_model() for this model
-        def get_model():
+        def _get_model():
             try:
-                return models.get_model(app_label, name, False)
+                return get_model(app_label, name, False)
             except TypeError:
                 # Django 1.7+
-                return models.get_model(app_label, name)
+                return get_model(app_label, name)
         # Pass the callable to SimpleLazyObject
-        lazy_model = SimpleLazyObject(get_model)
+        lazy_model = SimpleLazyObject(_get_model)
         # And set the auto_created to a lazy-loaded model object
         # of the class currently being created
         setattr(meta, 'auto_created', lazy_model)

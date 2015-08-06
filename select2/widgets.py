@@ -5,7 +5,10 @@ import django
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.forms import widgets
-from django.forms.util import flatatt
+try:
+    from django.forms.utils import flatatt
+except ImportError:
+    from django.forms.util import flatatt
 from django.utils.datastructures import MultiValueDict, MergeDict
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_unicode

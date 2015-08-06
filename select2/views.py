@@ -2,6 +2,12 @@ import copy
 import json
 
 from django.db import models
+try:
+    from django.apps import apps
+except ImportError:
+    from django.db.models.loading import get_model
+else:
+    get_model = apps.get_model
 from django.forms.models import ModelChoiceIterator
 from django.http import HttpResponse
 from django.utils.encoding import force_unicode
@@ -44,7 +50,7 @@ class Select2View(object):
     _field = None
 
     def get_field_and_model(self):
-        model_cls = models.get_model(self.app_label, self.model_name)
+        model_cls = get_model(self.app_label, self.model_name)
         if model_cls is None:
             raise ViewException('Model %s.%s does not exist' % (self.app_label, self.model_name))
         if self._field is None:
