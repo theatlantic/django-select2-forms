@@ -1,20 +1,11 @@
 #!/usr/bin/env python
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages
-
-
-setup_kwargs = {}
+from setuptools import setup, find_packages
 
 try:
-    setup_kwargs['long_description'] = open('README.rst').read()
+    readme = open('README.rst', 'rt').read()
 except IOError:
-    # Use the create_readme_rst command to convert README to reStructuredText
-    pass
+    raise AttributeError('Use the create_readme_rst command to convert README to reStructuredText')
 
 setup(
     name='django-select2-forms',
@@ -23,19 +14,21 @@ setup(
     author='Frankie Dintino',
     author_email='fdintino@theatlantic.com',
     url='https://github.com/theatlantic/django-select2-forms',
-    packages=find_packages(),
+    packages=find_packages(exclude=['ez_setup']),
+    include_package_data=True,
+    zip_safe=False,
+    use_2to3=True,
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Framework :: Django',
     ],
-    include_package_data=True,
-    zip_safe=False,
     entry_points={
         'distutils.commands': [
             'create_readme_rst = select2.build:create_readme_rst',
         ],
     },
-    **setup_kwargs)
+)
