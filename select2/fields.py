@@ -9,6 +9,7 @@ from django.db.models.fields.related import add_lazy_relation
 
 from .models.descriptors import SortableReverseManyRelatedObjectsDescriptor
 from .widgets import Select, SelectMultiple
+import collections
 
 
 __all__ = (
@@ -120,7 +121,7 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, forms.ModelMultipleChoice
         elif not self.required and not value:
             return []
 
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             value = value.split(',')
 
         if not isinstance(value, (list, tuple)):
@@ -222,7 +223,7 @@ class RelatedFieldMixin(object):
         # MultipleChoiceField takes a list of IDs.
         if defaults.get('initial') is not None:
             initial = defaults['initial']
-            if callable(initial):
+            if isinstance(initial, collections.Callable):
                 initial = initial()
             defaults['initial'] = [i._get_pk_val() for i in initial]
         return models.Field.formfield(self, **defaults)
@@ -237,7 +238,7 @@ class RelatedFieldMixin(object):
                     'field_name': self.name,
                     'app_label': self.model._meta.app_label,
                     'object_name': self.model._meta.object_name})
-        if not callable(self.search_field) and not isinstance(self.search_field, basestring):
+        if not isinstance(self.search_field, collections.Callable) and not isinstance(self.search_field, str):
             raise TypeError(
                 ("keyword argument 'search_field' must be either callable or "
                  "string on field '%(field_name)s' of model "
@@ -245,7 +246,7 @@ class RelatedFieldMixin(object):
                     'field_name': self.name,
                     'app_label': self.model._meta.app_label,
                     'object_name': self.model._meta.object_name})
-        if isinstance(self.search_field, basestring):
+        if isinstance(self.search_field, str):
             try:
                 opts = related.parent_model._meta
             except AttributeError:
@@ -295,7 +296,7 @@ class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
 
     def __init__(self, *args, **kwargs):
         self.sort_field_name = kwargs.pop('sort_field', self.sort_field_name)
-        help_text = kwargs.get('help_text', u'')
+        help_text = kwargs.get('help_text', '')
         super(ManyToManyField, self).__init__(*args, **kwargs)
         self.help_text = help_text
 
@@ -315,7 +316,7 @@ class ManyToManyField(RelatedFieldMixin, models.ManyToManyField):
         if self.sort_field_name is not None:
             def resolve_sort_field(field, model, cls):
                 field.sort_field = model._meta.get_field(field.sort_field_name)
-            if isinstance(self.rel.through, basestring):
+            if isinstance(self.rel.through, str):
                 add_lazy_relation(cls, self, self.rel.through, resolve_sort_field)
             else:
                 resolve_sort_field(self, self.rel.through, cls)

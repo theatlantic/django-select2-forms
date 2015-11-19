@@ -2,6 +2,7 @@ import copy
 import json
 
 from django.db import models
+import collections
 try:
     from django.apps import apps
 except ImportError:
@@ -28,12 +29,12 @@ class JsonResponse(HttpResponse):
     callback = None
 
     def __init__(self, content='', callback=None, content_type="application/json", *args, **kwargs):
-        if not isinstance(content, basestring):
+        if not isinstance(content, str):
             content = json.dumps(content)
         if callback is not None:
             self.callback = callback
         if self.callback is not None:
-            content = u"%s(\n%s\n)" % (self.callback, content)
+            content = "%s(\n%s\n)" % (self.callback, content)
             content_type= "text/javascript"
         return super(JsonResponse, self).__init__(content=content,
             content_type=content_type, *args, **kwargs)
@@ -76,7 +77,7 @@ class Select2View(object):
         # This is useful for model inheritance where the limit_choices_to can
         # not easily be overriden in child classes.
         model_queryset_method = '%s_queryset' % field.name
-        if callable(getattr(model_cls, model_queryset_method, None)):
+        if isinstance(getattr(model_cls, model_queryset_method, None), collections.Callable):
             queryset = getattr(model_cls, model_queryset_method)(queryset)
 
         formfield = field.formfield()
@@ -105,7 +106,7 @@ class Select2View(object):
             'results': [],
         }
         for value, label in iterator:
-            if value is u'':
+            if value is '':
                 continue
             data['results'].append({
                 'id': value,
@@ -116,24 +117,24 @@ class Select2View(object):
     def init_selection(self):
         try:
             field, model_cls = self.get_field_and_model()
-        except ViewException, e:
-            return self.get_response({'error': unicode(e)}, status=500)
+        except ViewException as e:
+            return self.get_response({'error': str(e)}, status=500)
 
         q = self.request.GET.get('q', None)
         try:
             if q is None:
                 raise InvalidParameter("q parameter required")
-            pks = q.split(u',')
+            pks = q.split(',')
             try:
-                pks = [long(pk) for pk in pks]
+                pks = [int(pk) for pk in pks]
             except TypeError:
                 raise InvalidParameter("q parameter must be comma separated "
                                        "list of integers")
-        except InvalidParameter, e:
-            return self.get_response({'error': unicode(e)}, status=500)
+        except InvalidParameter as e:
+            return self.get_response({'error': str(e)}, status=500)
 
         queryset = field.queryset.filter(**{
-            (u'%s__in' % field.rel.get_related_field().name): pks,
+            ('%s__in' % field.rel.get_related_field().name): pks,
         }).distinct()
         pk_ordering = dict([(force_unicode(pk), i) for i, pk in enumerate(pks)])
 
@@ -161,8 +162,8 @@ class Select2View(object):
     def fetch_items(self):
         try:
             field, model_cls = self.get_field_and_model()
-        except ViewException, e:
-            return self.get_response({'error': unicode(e)}, status=500)
+        except ViewException as e:
+            return self.get_response({'error': str(e)}, status=500)
 
         queryset = copy.deepcopy(field.queryset)
 
@@ -188,11 +189,11 @@ class Select2View(object):
             else:
                 if page < 1:
                     raise InvalidParameter("Invalid page '%s' passed")
-        except InvalidParameter, e:
-            return self.get_response({'error': unicode(e)}, status=500)
+        except InvalidParameter as e:
+            return self.get_response({'error': str(e)}, status=500)
 
         search_field = field.search_field
-        if callable(search_field):
+        if isinstance(search_field, collections.Callable):
             search_field = search_field(q)
         if isinstance(search_field, models.Q):
             q_obj = search_field
