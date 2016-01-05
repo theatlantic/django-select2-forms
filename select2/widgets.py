@@ -5,7 +5,7 @@ import django
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.forms import widgets
-from django.utils.datastructures import MergeDict, MultiValueDict
+from django.utils.datastructures import MultiValueDict
 from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 
@@ -15,10 +15,17 @@ try:
     from django.forms.utils import flatatt
 except ImportError:
     from django.forms.util import flatatt
+
 try:
     from django.utils.encoding import force_unicode as force_text
 except (NameError, ImportError):
     from django.utils.encoding import force_test
+
+try:
+    from django.utils.datastructures import MergeDict
+except ImportError:
+    class MergeDict(object):
+        pass
 
 
 
