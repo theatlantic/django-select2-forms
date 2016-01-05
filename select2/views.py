@@ -1,19 +1,25 @@
+import collections
 import copy
 import json
 
 from django.db import models
-import collections
+from django.forms.models import ModelChoiceIterator
+from django.http import HttpResponse
+
+from .fields import ManyToManyField
+
 try:
     from django.apps import apps
 except ImportError:
     from django.db.models.loading import get_model
 else:
     get_model = apps.get_model
-from django.forms.models import ModelChoiceIterator
-from django.http import HttpResponse
-from django.utils.encoding import force_unicode
 
-from .fields import ManyToManyField
+
+try:
+    from django.utils.encoding import force_unicode as force_text
+except (NameError, ImportError):
+    from django.utils.encoding import force_text
 
 
 class ViewException(Exception):
@@ -136,13 +142,13 @@ class Select2View(object):
         queryset = field.queryset.filter(**{
             ('%s__in' % field.rel.get_related_field().name): pks,
         }).distinct()
-        pk_ordering = dict([(force_unicode(pk), i) for i, pk in enumerate(pks)])
+        pk_ordering = dict([(force_text(pk), i) for i, pk in enumerate(pks)])
 
         data = self.get_data(queryset)
 
         # Make sure we return in the same order we were passed
         def results_sort_callback(item):
-            pk = force_unicode(item['id'])
+            pk = force_text(item['id'])
             return pk_ordering[pk]
         data['results'] = sorted(data['results'], key=results_sort_callback)
 
