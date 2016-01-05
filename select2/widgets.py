@@ -1,20 +1,32 @@
-from itertools import chain
 import json
+from itertools import chain
 
 import django
-from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.forms import widgets
+from django.utils.datastructures import MultiValueDict
+from django.utils.html import conditional_escape, escape
+from django.utils.safestring import mark_safe
+
+from .utils import combine_css_classes
+
 try:
     from django.forms.utils import flatatt
 except ImportError:
     from django.forms.util import flatatt
-from django.utils.datastructures import MultiValueDict, MergeDict
-from django.utils.html import escape, conditional_escape
-from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
 
-from .utils import combine_css_classes
+try:
+    from django.utils.encoding import force_unicode as force_text
+except (NameError, ImportError):
+    from django.utils.encoding import force_text
+
+try:
+    from django.utils.datastructures import MergeDict
+except ImportError:
+    class MergeDict(object):
+        pass
+
 
 
 __all__ = ('Select', 'SelectMultiple',)
@@ -144,7 +156,7 @@ class Select(widgets.Input):
         return mark_safe('\n'.join(output))
 
     def render_option(self, selected_choices, option_value, option_label):
-        option_value = force_unicode(option_value)
+        option_value = force_test(option_value)
         if option_value in selected_choices:
             selected_html = ' selected="selected"'
             if not self.allow_multiple_selected:
@@ -154,15 +166,15 @@ class Select(widgets.Input):
             selected_html = ''
         return '<option value="%s"%s>%s</option>' % (
             escape(option_value), selected_html,
-            conditional_escape(force_unicode(option_label)))
+            conditional_escape(force_text(option_label)))
 
     def render_options(self, choices, selected_choices):
         # Normalize to strings.
-        selected_choices = set(force_unicode(v) for v in selected_choices)
+        selected_choices = set(force_test(v) for v in selected_choices)
         output = []
         for option_value, option_label in chain(self.choices, choices):
             if isinstance(option_label, (list, tuple)):
-                output.append('<optgroup label="%s">' % escape(force_unicode(option_value)))
+                output.append('<optgroup label="%s">' % escape(force_text(option_value)))
                 for option in option_label:
                     output.append(self.render_option(selected_choices, *option))
                 output.append('</optgroup>')
@@ -194,7 +206,7 @@ class SelectMultiple(Select):
 
     def _format_value(self, value):
         if isinstance(value, list):
-            value = ','.join([force_unicode(v) for v in value])
+            value = ','.join([force_text(v) for v in value])
         return value
 
     # Restrict defining the _has_changed method to earlier than Django 1.6.
