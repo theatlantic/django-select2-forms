@@ -10,7 +10,7 @@ except ImportError:
     from django.db.models.fields.related import ReverseManyRelatedObjectsDescriptor as ReverseDescriptor
 
 
-class SortableReverseManyRelatedObjectsDescriptor(ReverseManyRelatedObjectsDescriptor):
+class SortableReverseManyRelatedObjectsDescriptor(ReverseDescriptor):
 
     @cached_property
     def related_manager_cls(self):
