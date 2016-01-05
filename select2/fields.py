@@ -14,7 +14,7 @@ from .widgets import Select, SelectMultiple
 try:
     from django.utils.encoding import force_unicode as force_text
 except (NameError, ImportError):
-    from django.utils.encoding import force_test
+    from django.utils.encoding import force_text
 
 
 
