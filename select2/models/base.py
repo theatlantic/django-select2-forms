@@ -53,7 +53,7 @@ class SortableThroughModelBase(ModelBase):
             module = attrs.get('__module__')
             new_class = base_super_new(cls, name, bases, {'__module__': module})
             model_module = sys.modules[new_class.__module__]
-            app_label = model_module.__name__.split('.')[-2]
+            app_label = model_module.__name__.split('.')[0]
 
         # Create a callbable using closure variables that returns
         # get_model() for this model
