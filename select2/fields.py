@@ -5,6 +5,7 @@ from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models.fields import FieldDoesNotExist
 from django.forms.models import ModelChoiceIterator
 from django.utils.encoding import force_unicode
+from django.utils.functional import Promise
 from django.db.models.fields.related import add_lazy_relation
 
 from .models.descriptors import SortableReverseManyRelatedObjectsDescriptor
@@ -39,6 +40,23 @@ class Select2FieldMixin(object):
         # Django 1.2 backwards-compatibility
         if not hasattr(self.widget, 'is_required'):
             self.widget.is_required = self.required
+
+    @property
+    def choices(self):
+        """
+        When it's time to get the choices, if it was a lazy then figure it out
+        now and memoize the result.
+        """
+        if isinstance(self._choices, Promise):
+            self._choices = list(self._choices)
+        return self._choices
+
+    @choices.setter
+    def choices(self, value):
+        self._set_choices(value)
+
+    def _set_choices(self, value):
+        self._choices = value
 
 
 class ChoiceField(Select2FieldMixin, forms.ChoiceField):
