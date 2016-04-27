@@ -1,7 +1,10 @@
 import django
 from django.db import router
 from django.db.models import signals
-from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
+try:
+    from django.db.models.fields.related import ReverseManyRelatedObjectsDescriptor as ReverseManyToOneDescriptor
+except ImportError:
+    from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
 from ..utils import cached_property
 
 

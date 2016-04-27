@@ -10,6 +10,11 @@ try:
 except ImportError:
     from django.forms.util import flatatt
 from django.utils.datastructures import MultiValueDict
+try:
+        from django.utils.datastructures import MergeDict
+except ImportError:
+        MergeDict = type('MergeDict', (object, ), {})
+
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
@@ -205,6 +210,6 @@ class SelectMultiple(Select):
 
     def value_from_datadict(self, data, files, name):
         # Since ajax widgets use hidden or text input fields, when using ajax the value needs to be a string.
-        if not self.ajax and isinstance(data, (MultiValueDict)):
+        if not self.ajax and isinstance(data, (MultiValueDict, MergeDict)):
             return data.getlist(name)
         return data.get(name, None)
