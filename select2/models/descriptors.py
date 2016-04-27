@@ -4,7 +4,7 @@ from django.db.models import signals
 try:
     from django.db.models.fields.related import ReverseManyRelatedObjectsDescriptor as ReverseManyToOneDescriptor
 except ImportError:
-    from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
+    from django.db.models.fields.related import ReverseManyToOneDescriptor
 from ..utils import cached_property
 
 

@@ -11,9 +11,9 @@ except ImportError:
     from django.forms.util import flatatt
 from django.utils.datastructures import MultiValueDict
 try:
-        from django.utils.datastructures import MergeDict
+    from django.utils.datastructures import MergeDict
 except ImportError:
-        MergeDict = type('MergeDict', (object, ), {})
+    MergeDict = type('MergeDict', (object, ), {})
 
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_unicode
