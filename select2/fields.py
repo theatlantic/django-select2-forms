@@ -22,6 +22,12 @@ class Select2FieldMixin(object):
 
     def __init__(self, *args, **kwargs):
         widget_kwargs = {}
+        # The child field class can pass widget_kwargs as a dict. We use this
+        # in MultipleChoiceField to ensure that the field's choices get passed
+        # along to the widget. This is unnecessary for model fields since the
+        # choices in that case are iterators wrapping the queryset.
+        if 'widget_kwargs' in kwargs:
+            widget_kwargs.update(kwargs.pop('widget_kwargs'))
         widget_kwarg_keys = ['overlay', 'js_options', 'sortable', 'ajax']
         for k in widget_kwarg_keys:
             if k in kwargs:
@@ -67,6 +73,15 @@ class ChoiceField(Select2FieldMixin, forms.ChoiceField):
 class MultipleChoiceField(Select2FieldMixin, forms.MultipleChoiceField):
 
     widget = SelectMultiple
+
+    def __init__(self, *args, **kwargs):
+        # Explicitly pass the choices kwarg to the widget. "widget_kwargs"
+        # is not a standard Django Form Field kwarg, but we pop it off in
+        # Select2FieldMixin.__init__
+        kwargs['widget_kwargs'] = kwargs.get('widget_kwargs') or {}
+        if 'choices' in kwargs:
+            kwargs['widget_kwargs']['choices'] = kwargs['choices']
+        super(MultipleChoiceField, self).__init__(*args, **kwargs)
 
     def has_changed(self, initial, data):
         widget = self.widget
