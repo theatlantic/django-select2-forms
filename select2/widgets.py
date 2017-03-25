@@ -2,22 +2,17 @@ from itertools import chain
 import json
 
 import django
-from django.core.urlresolvers import reverse
-from django.conf import settings
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.forms import widgets
-try:
-    from django.forms.utils import flatatt
-except ImportError:
-    from django.forms.util import flatatt
+from django.forms.utils import flatatt
 from django.utils.datastructures import MultiValueDict
-try:
-    from django.utils.datastructures import MergeDict
-except ImportError:
-    MergeDict = type('MergeDict', (object, ), {})
-
 from django.utils.html import escape, conditional_escape
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
+from django.utils import six
 
 from .utils import combine_css_classes
 
@@ -31,13 +26,14 @@ class Select(widgets.Input):
 
     class Media:
         js = (
-            "%s%s?v=2" % (settings.STATIC_URL, "select2/js/select2.jquery_ready.js"),
-            "%s%s?v=1" % (settings.STATIC_URL, "select2/js/select2.js"),
+            "select2/js/select2.jquery_ready.js",
+            "select2/js/select2.jquery_ui_sortable.js",
+            "select2/js/select2.js",
         )
         css = {
             "all": (
-                "%s%s?v=1" % (settings.STATIC_URL, "select2/css/select2.css"),
-                "%s%s?v=2" % (settings.STATIC_URL, "select2/css/djselect2.css"),
+                "select2/css/select2.css",
+                "select2/css/djselect2.css",
             )}
 
     js_options_map = {
@@ -62,20 +58,22 @@ class Select(widgets.Input):
         self.ajax = kwargs.pop('ajax', self.ajax)
         self.js_options = {}
         if js_options is not None:
-            for k, v in js_options.iteritems():
+            for k, v in six.iteritems(js_options):
                 if k in self.js_options_map:
                     k = self.js_options_map[k]
                 self.js_options[k] = v
 
-        if attrs is None:
-            attrs = {}
+        attrs = attrs.copy() if attrs is not None else {}
+
+        if 'sortable' in kwargs:
+            self.sortable = kwargs.pop('sortable')
 
         self.attrs = getattr(self, 'attrs', {}) or {}
 
         self.attrs.update({
             'data-placeholder': kwargs.pop('overlay', None),
             'class': combine_css_classes(attrs.get('class', ''), self.default_class),
-            'data-sortable': json.dumps(kwargs.pop('sortable', self.sortable)),
+            'data-sortable': json.dumps(self.sortable),
         })
 
         self.attrs.update(attrs)
@@ -89,12 +87,26 @@ class Select(widgets.Input):
             'field_name': self.field.name,
         })
 
+    def option_to_data(self, option_value, option_label):
+        if not option_value:
+            return
+        if isinstance(option_label, (list, tuple)):
+            return {
+                "text": force_text(option_value),
+                "children": filter(None,
+                    [self.option_to_data(v, l) for v, l in option_label]),
+            }
+        return {
+            "id": force_text(option_value),
+            "text": force_text(option_label),
+        }
+
     def render(self, name, value, attrs=None, choices=(), js_options=None):
         options = {}
-        attrs = attrs or {}
+        attrs = dict(self.attrs, **(attrs or {}))
         js_options = js_options or {}
 
-        for k, v in dict(self.js_options, **js_options).iteritems():
+        for k, v in six.iteritems(dict(self.js_options, **js_options)):
             if k in self.js_options_map:
                 k = self.js_options_map[k]
             options[k] = v
@@ -111,7 +123,7 @@ class Select(widgets.Input):
                 'dataType': 'jsonp' if is_jsonp else 'json',
                 'quietMillis': quiet_millis,
             }
-            for k, v in ajax_opts.iteritems():
+            for k, v in six.iteritems(ajax_opts):
                 if k in self.js_options_map:
                     k = self.js_options_map[k]
                 default_ajax_opts[k] = v
@@ -119,6 +131,12 @@ class Select(widgets.Input):
 
         if not self.is_required:
             options.update({'allowClear': options.get('allowClear', True)})
+
+        if self.sortable and not self.ajax:
+            data = []
+            for option_value, option_label in chain(self.choices, choices):
+                data.append(self.option_to_data(option_value, option_label))
+            options['data'] = list(filter(None, data))
 
         attrs.update({
             'data-select2-options': json.dumps(options),
@@ -128,9 +146,8 @@ class Select(widgets.Input):
             attrs.update({
                 'data-init-selection-url': self.reverse('select2_init_selection'),
             })
+        if self.ajax or self.sortable:
             self.input_type = 'hidden'
-            if django.VERSION < (1, 7):
-                self.is_hidden = True
             return super(Select, self).render(name, value, attrs=attrs)
         else:
             return self.render_select(name, value, attrs=attrs, choices=choices)
@@ -138,7 +155,9 @@ class Select(widgets.Input):
     def render_select(self, name, value, attrs=None, choices=()):
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, name=name)
+        attrs = attrs or {}
+        attrs['name'] = name
+        final_attrs = self.build_attrs(attrs)
         output = [u'<select%s>' % flatatt(final_attrs)]
         if not isinstance(value, (list, tuple)):
             value = [value]
@@ -149,7 +168,7 @@ class Select(widgets.Input):
         return mark_safe(u'\n'.join(output))
 
     def render_option(self, selected_choices, option_value, option_label):
-        option_value = force_unicode(option_value)
+        option_value = force_text(option_value)
         if option_value in selected_choices:
             selected_html = u' selected="selected"'
             if not self.allow_multiple_selected:
@@ -159,15 +178,15 @@ class Select(widgets.Input):
             selected_html = ''
         return u'<option value="%s"%s>%s</option>' % (
             escape(option_value), selected_html,
-            conditional_escape(force_unicode(option_label)))
+            conditional_escape(force_text(option_label)))
 
     def render_options(self, choices, selected_choices):
         # Normalize to strings.
-        selected_choices = set(force_unicode(v) for v in selected_choices)
+        selected_choices = set(force_text(v) for v in selected_choices)
         output = []
         for option_value, option_label in chain(self.choices, choices):
             if isinstance(option_label, (list, tuple)):
-                output.append(u'<optgroup label="%s">' % escape(force_unicode(option_value)))
+                output.append(u'<optgroup label="%s">' % escape(force_text(option_value)))
                 for option in option_label:
                     output.append(self.render_option(selected_choices, *option))
                 output.append(u'</optgroup>')
@@ -184,8 +203,9 @@ class SelectMultiple(Select):
         options = {}
         default_attrs = {}
         ajax = kwargs.get('ajax', self.ajax)
-        if ajax:
-            options.update({'multiple': True,})
+        sortable = kwargs.get('sortable', self.sortable)
+        if ajax or sortable:
+            options.update({'multiple': True})
         else:
             default_attrs.update({
                 'multiple': 'multiple',
@@ -197,19 +217,20 @@ class SelectMultiple(Select):
         super(SelectMultiple, self).__init__(attrs=attrs, choices=choices,
                 js_options=options, *args, **kwargs)
 
-    def _format_value(self, value):
+    def format_value(self, value):
         if isinstance(value, list):
-            value = u','.join([force_unicode(v) for v in value])
+            value = u','.join([force_text(v) for v in value])
         return value
 
-    # Restrict defining the _has_changed method to earlier than Django 1.6.
-    if django.VERSION < (1, 6):
-        def _has_changed(self, initial, data):
-            initial = self._format_value(initial)
-            return super(SelectMultiple, self)._has_changed(initial, data)
+    if django.VERSION < (1, 10):
+        _format_value = format_value
 
     def value_from_datadict(self, data, files, name):
         # Since ajax widgets use hidden or text input fields, when using ajax the value needs to be a string.
-        if not self.ajax and isinstance(data, (MultiValueDict, MergeDict)):
-            return data.getlist(name)
-        return data.get(name, None)
+        if not self.ajax and not self.sortable and isinstance(data, MultiValueDict):
+            value = data.getlist(name)
+        else:
+            value = data.get(name, None)
+        if isinstance(value, six.string_types):
+            return [v for v in value.split(',') if v]
+        return value

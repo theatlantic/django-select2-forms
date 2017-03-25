@@ -25,24 +25,21 @@ Configuration
 =============
 
 ``django-select2-forms`` serves static assets using
-`django.contrib.staticfiles <https://docs.djangoproject.com/en/1.5/howto/static-files/>`_,
+`django.contrib.staticfiles <https://docs.djangoproject.com/en/1.8/howto/static-files/>`_,
 and so requires that ``"select2"`` be added to your settings'
 ``INSTALLED_APPS``:
 
-::
+.. code-block:: python
 
     INSTALLED_APPS = (
         # ...
         'select2',
     )
 
-(`django-staticfiles <http://django-staticfiles.readthedocs.org/en/latest/>`_
-should also work for Django <= 1.2).
-
 To use django-select2-forms' ajax support, ``'select2.urls'`` must be
 included in your urls.py ``urlpatterns``:
 
-::
+.. code-block:: python
 
     urlpatterns = patterns('',
         # ...
@@ -65,26 +62,28 @@ select2.fields.ForeignKey examples
 In the following two examples, an "entry" is associated with only one
 author. The example below does not use ajax, but instead performs
 autocomplete filtering on the client-side using the ``<option>``
-elements (the labels of which are drawn from ``Author.__unicode__()``)
+elements (the labels of which are drawn from ``Author.__str__()``)
 in an html ``<select>``.
 
-::
+.. code-block:: python
 
+    @python_2_unicode_compatible
     class Author(models.Model):
         name = models.CharField(max_length=100)
 
-        def __unicode__(self):
+        def __str__(self):
             return self.name
 
     class Entry(models.Model):
         author = select2.fields.ForeignKey(Author,
-            overlay="Choose an author...")
+            overlay="Choose an author...",
+            on_delete=models.CASCADE)
 
 This more advanced example autocompletes via ajax using the
 ``Author.name`` field and limits the autocomplete search to
 ``Author.objects.filter(active=True)``
 
-::
+.. code-block:: python
 
     class Author(models.Model):
         name = models.CharField(max_length=100)
@@ -98,7 +97,8 @@ This more advanced example autocompletes via ajax using the
             overlay="Choose an author...",
             js_options={
                 'quiet_millis': 200,
-            })
+            },
+            on_delete=models.CASCADE)
 
 select2.fields.ManyToManyField examples
 ---------------------------------------
@@ -108,12 +108,13 @@ This example does not do author name lookup via ajax, but populates
 ``<option>`` elements in a ``<select>`` with ``Author.__unicode__()``
 for labels.
 
-::
+.. code-block:: python
 
+    @python_2_unicode_compatible
     class Author(models.Model):
         name = models.CharField(max_length=100)
 
-        def __unicode__(self):
+        def __str__(self):
             return self.name
 
     class Entry(models.Model):
@@ -122,7 +123,7 @@ for labels.
 The following "kitchen sink" example allows authors to be ordered, and
 uses ajax to autocomplete on two variants of an author's name.
 
-::
+.. code-block:: python
 
     from django.db import models
     from django.db.models import Q
@@ -132,16 +133,6 @@ uses ajax to autocomplete on two variants of an author's name.
     class Author(models.Model):
         name = models.CharField(max_length=100)
         alt_name = models.CharField(max_length=100, blank=True, null=True)
-
-    class EntryAuthors(select2.models.SortableThroughModel):
-        """
-        A custom m2m through table, with a `position` field for sorting.
-
-        This allows us to store and retrieve an ordered list of authors for an entry.
-        """
-        entry = models.ForeignKey('Entry')
-        author = models.ForeignKey(Author)
-        position = models.PositiveSmallIntegerField()
 
     class Entry(models.Model):
         categories = select2.fields.ManyToManyField(Author,
@@ -162,35 +153,31 @@ and have the same class names as their standard django counterparts
 ``ModelMultipleChoiceField``). Here is the first ``ForeignKey`` example
 above, done with django formfields.
 
-::
+.. code-block:: python
 
     class AuthorManager(models.Manager):
         def as_choices(self):
             for author in self.all():
-                yield (author.pk, unicode(author))
+                yield (author.pk, force_text(author))
 
+    @python_2_unicode_compatible
     class Author(models.Model):
         name = models.CharField(max_length=100)
         objects = AuthorManager()
 
-        def __unicode__(self):
+        def __str__(self):
             return self.name
 
     class Entry(models.Model):
-        author = models.ForeignKey(Author)
+        author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
     class EntryForm(forms.ModelForm):
         author = select2.fields.ChoiceField(
-                choices=Author.objects.as_choices(),
-                overlay="Choose an author...")
+            choices=Author.objects.as_choices(),
+            overlay="Choose an author...")
 
         class Meta:
             model = Entry
-
-API Documentation
-=================
-
-`Read API documentation on github <https://github.com/theatlantic/django-select2-forms#api-documentation>`_
 
 License
 =======

@@ -5,7 +5,7 @@ try:
     from django.db.models.fields.related import ReverseManyRelatedObjectsDescriptor as ReverseManyToOneDescriptor
 except ImportError:
     from django.db.models.fields.related import ReverseManyToOneDescriptor
-from ..utils import cached_property
+from django.utils.functional import cached_property
 
 
 class SortableReverseManyRelatedObjectsDescriptor(ReverseManyToOneDescriptor):
@@ -114,9 +114,9 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyToOneDescriptor):
                     opts = self.through._meta
                     # If the through table has Meta.ordering defined, order the objects
                     # returned by the ManyRelatedManager by those fields.
-                    if self.field.sort_field_name:
+                    if self.field.sort_value_field_name:
                         object_name = opts.object_name.lower()
-                        order_by = ['%s__%s' % (object_name, self.field.sort_field_name)]
+                        order_by = ['%s__%s' % (object_name, self.field.sort_value_field_name)]
                         if self.model._meta.ordering != order_by:
                             return qset.order_by(*order_by)
                     return qset
@@ -134,9 +134,9 @@ class SortableReverseManyRelatedObjectsDescriptor(ReverseManyToOneDescriptor):
                 opts = self.through._meta
                 # If the through table has Meta.ordering defined, order the objects
                 # returned by the ManyRelatedManager by those fields.
-                if self.field.sort_field_name:
+                if self.field.sort_value_field_name:
                     object_name = opts.object_name.lower()
-                    order_by = ['%s__%s' % (object_name, self.field.sort_field_name)]
+                    order_by = ['%s__%s' % (object_name, self.field.sort_value_field_name)]
                     if self.model._meta.ordering != order_by:
                         rel_qs = rel_qs.order_by(*order_by)
                 return (rel_qs, rel_obj_attr, instance_attr, single, cache_name)

@@ -1,0 +1,28 @@
+language: python
+
+sudo: false
+
+install:
+  - pip install tox 
+
+script:
+  - travis_retry travis_retry travis_retry tox -- --failfast
+
+matrix:
+  include:
+    - { python: 2.7, env: TOXENV=py27-dj18 }
+    - { python: 3.6, env: TOXENV=py36-dj18 }
+    - { python: 2.7, env: TOXENV=py27-dj18-grp }
+    - { python: 2.7, env: TOXENV=py27-dj19 }
+    - { python: 3.6, env: TOXENV=py36-dj19 }
+    - { python: 2.7, env: TOXENV=py27-dj19-grp }
+    - { python: 2.7, env: TOXENV=py27-dj110 }
+    - { python: 3.6, env: TOXENV=py36-dj110 }
+    - { python: 2.7, env: TOXENV=py27-dj110-grp }
+    - { python: 2.7, env: TOXENV=py27-dj111 }
+    - { python: 3.6, env: TOXENV=py36-dj111 }
+  allow_failures:
+    - env: TOXENV=py27-dj111
+    - env: TOXENV=py36-dj111
+
+cache: pip

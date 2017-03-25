@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="tests.publisher">
+        <field type="CharField" name="name">University of Minnesota Press</field>
+        <field type="CharField" name="country">US</field>
+    </object>
+    <object pk="2" model="tests.publisher">
+        <field type="CharField" name="name">Penguin Press</field>
+        <field type="CharField" name="country">US</field>
+    </object>
+    <object pk="3" model="tests.publisher">
+        <field type="CharField" name="name">Presses Universitaires de France</field>
+        <field type="CharField" name="country">FR</field>
+    </object>
+    <object pk="4" model="tests.publisher">
+        <field type="CharField" name="name">Columbia University Press</field>
+        <field type="CharField" name="country">US</field>
+    </object>
+    <object pk="1" model="tests.author">
+        <field type="CharField" name="first_name">Gilles</field>
+        <field type="CharField" name="last_name">Deleuze</field>
+        <field type="BooleanField" name="alive">False</field>
+    </object>
+    <object pk="2" model="tests.author">
+        <field type="CharField" name="first_name">Félix</field>
+        <field type="CharField" name="last_name">Guattari</field>
+        <field type="BooleanField" name="alive">False</field>
+    </object>
+    <object pk="3" model="tests.author">
+        <field type="CharField" name="first_name">Thomas</field>
+        <field type="CharField" name="last_name">Pynchon</field>
+        <field type="BooleanField" name="alive">True</field>
+    </object>
+    <object pk="4" model="tests.author">
+        <field type="CharField" name="first_name">Mark</field>
+        <field type="CharField" name="last_name">Leyner</field>
+        <field type="BooleanField" name="alive">True</field>
+    </object>
+</django-objects>

@@ -85,7 +85,7 @@ var DjangoSelect2 = window.DjangoSelect2 || {};
             DjangoSelect2.versionCompare = versionCompare;
         }
         var bestJQuery = getBestJQuery();
-        if (versionCompare(bestJQuery[1].fn.jquery, '1.4.2') <= 0) {
+        if (versionCompare(bestJQuery[1].fn.jquery, '1.7.1') <= 0) {
             var scripts = document.getElementsByTagName("script"),
                 currentScript = scripts[scripts.length-1],
                 currentSrc = currentScript.src,
@@ -163,8 +163,8 @@ DjangoSelect2.onjqueryload = (function($) {
                 }
                 $input.select2(options);
                 var isSortable = $input.data('sortable');
-                if (isSortable) {
-                    $input.select2("container").find("ul.select2-choices").sortable({
+                if (isSortable && typeof $.fn.djs2sortable == 'function') {
+                    $input.select2("container").find("ul.select2-choices").djs2sortable({
                         containment: 'parent',
                         start: function() { $input.select2("onSortStart"); },
                         update: function() { $input.select2("onSortEnd"); }

@@ -2,17 +2,13 @@ import copy
 import json
 
 from django.db import models
-try:
-    from django.apps import apps
-except ImportError:
-    from django.db.models.loading import get_model
-else:
-    get_model = apps.get_model
+from django.apps import apps
 from django.forms.models import ModelChoiceIterator
 from django.http import HttpResponse
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
+from django.utils import six
 
-from .fields import ManyToManyField
+from .fields import ManyToManyField, compat_rel
 
 
 class ViewException(Exception):
@@ -28,13 +24,13 @@ class JsonResponse(HttpResponse):
     callback = None
 
     def __init__(self, content='', callback=None, content_type="application/json", *args, **kwargs):
-        if not isinstance(content, basestring):
+        if not isinstance(content, six.string_types):
             content = json.dumps(content)
         if callback is not None:
             self.callback = callback
         if self.callback is not None:
             content = u"%s(\n%s\n)" % (self.callback, content)
-            content_type= "text/javascript"
+            content_type = "text/javascript"
         return super(JsonResponse, self).__init__(content=content,
             content_type=content_type, *args, **kwargs)
 
@@ -50,7 +46,7 @@ class Select2View(object):
     _field = None
 
     def get_field_and_model(self):
-        model_cls = get_model(self.app_label, self.model_name)
+        model_cls = apps.get_model(self.app_label, self.model_name)
         if model_cls is None:
             raise ViewException('Model %s.%s does not exist' % (self.app_label, self.model_name))
         if self._field is None:
@@ -116,7 +112,7 @@ class Select2View(object):
     def init_selection(self):
         try:
             field, model_cls = self.get_field_and_model()
-        except ViewException, e:
+        except ViewException as e:
             return self.get_response({'error': unicode(e)}, status=500)
 
         q = self.request.GET.get('q', None)
@@ -125,23 +121,23 @@ class Select2View(object):
                 raise InvalidParameter("q parameter required")
             pks = q.split(u',')
             try:
-                pks = [long(pk) for pk in pks]
+                pks = [int(pk) for pk in pks]
             except TypeError:
                 raise InvalidParameter("q parameter must be comma separated "
                                        "list of integers")
-        except InvalidParameter, e:
+        except InvalidParameter as e:
             return self.get_response({'error': unicode(e)}, status=500)
 
         queryset = field.queryset.filter(**{
-            (u'%s__in' % field.rel.get_related_field().name): pks,
+            (u'%s__in' % compat_rel(field).get_related_field().name): pks,
         }).distinct()
-        pk_ordering = dict([(force_unicode(pk), i) for i, pk in enumerate(pks)])
+        pk_ordering = dict([(force_text(pk), i) for i, pk in enumerate(pks)])
 
         data = self.get_data(queryset)
 
         # Make sure we return in the same order we were passed
         def results_sort_callback(item):
-            pk = force_unicode(item['id'])
+            pk = force_text(item['id'])
             return pk_ordering[pk]
         data['results'] = sorted(data['results'], key=results_sort_callback)
 
@@ -161,7 +157,7 @@ class Select2View(object):
     def fetch_items(self):
         try:
             field, model_cls = self.get_field_and_model()
-        except ViewException, e:
+        except ViewException as e:
             return self.get_response({'error': unicode(e)}, status=500)
 
         queryset = copy.deepcopy(field.queryset)
@@ -188,7 +184,7 @@ class Select2View(object):
             else:
                 if page < 1:
                     raise InvalidParameter("Invalid page '%s' passed")
-        except InvalidParameter, e:
+        except InvalidParameter as e:
             return self.get_response({'error': unicode(e)}, status=500)
 
         search_field = field.search_field
