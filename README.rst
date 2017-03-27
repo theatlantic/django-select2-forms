@@ -1,6 +1,9 @@
 django-select2-forms
 ####################
 
+.. image:: https://travis-ci.org/theatlantic/django-select2-forms.svg?branch=master
+    :target: https://travis-ci.org/theatlantic/django-select2-forms
+
 **django-select2-forms** is a project that makes available Django form
 fields that use the `Select2 javascript
 plugin <http://ivaynberg.github.com/select2/>`_. It was created by
