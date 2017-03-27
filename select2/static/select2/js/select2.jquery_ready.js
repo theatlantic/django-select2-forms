@@ -94,7 +94,7 @@ var DjangoSelect2 = window.DjangoSelect2 || {};
             document.write('<scr' + 'ipt type="text/javascript" src="' + newSrc + '"></sc' + 'ript>');
         } else {
             DjangoSelect2.jQueryObj = bestJQuery[0];
-            DjangoSelect2.jQuery = bestJQuery[1].noConflict();
+            DjangoSelect2.jQuery = bestJQuery[1];
         }
     }
 
