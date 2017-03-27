@@ -57,6 +57,7 @@ var DjangoSelect2 = window.DjangoSelect2 || {};
                 update: function() { $input.select2("onSortEnd"); }
             });
         }
+        $input.data('select2').selection.addClass('vTextField');
     };
 
     $(document).ready(function() {

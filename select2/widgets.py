@@ -33,7 +33,6 @@ class Select(widgets.Input):
         css = {
             "all": (
                 "select2/css/select2.css",
-                "select2/css/djselect2.css",
             )}
 
     js_options_map = {
