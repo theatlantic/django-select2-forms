@@ -32,8 +32,17 @@ class Author(models.Model):
 
 
 @python_2_unicode_compatible
+class Library(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+@python_2_unicode_compatible
 class Book(models.Model):
     title = models.CharField(max_length=100)
+    library = models.ForeignKey(Library, blank=True, null=True, on_delete=models.CASCADE)
 
     publisher = Select2ForeignKey(
         Publisher, blank=True, null=True, related_name="+",

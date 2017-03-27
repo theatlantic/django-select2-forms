@@ -1,10 +1,12 @@
 import contextlib
+import unittest
 
+import django
+from django.conf import settings
 from django_admin_testutils import AdminSeleniumTestCase
 from selenium.webdriver.common.keys import Keys
 
-import select2.fields
-from .models import Author, Publisher, Book
+from .models import Author, Publisher, Book, Library
 
 
 class TestAdmin(AdminSeleniumTestCase):
@@ -40,7 +42,7 @@ class TestAdmin(AdminSeleniumTestCase):
 
     @contextlib.contextmanager
     def select2_open_dropdown(self, field_name, timeout=None):
-        is_m2m = isinstance(Book._meta.get_field(field_name), select2.fields.ManyToManyField)
+        is_m2m = "authors" in field_name
 
         count_attr = 'open' if is_m2m else 'load'
 
@@ -224,3 +226,22 @@ class TestAdmin(AdminSeleniumTestCase):
         deleuze = Author.objects.get(last_name='Deleuze')
         guattari = Author.objects.get(last_name='Guattari')
         self.assertEqual(list(book.authors_full_name_ajax.all()), [deleuze, guattari])
+
+    def test_inline_add_init(self):
+        if django.VERSION < (1, 9):
+            raise unittest.SkipTest("Django 1.8 does not have the formset:added event")
+        if 'grappelli' in settings.INSTALLED_APPS:
+            raise unittest.SkipTest("django-grappelli does not have the formset:added event")
+        library = Library.objects.create(name="Princeton University Library")
+        columbia_univ_press = Publisher.objects.get(name='Columbia University Press')
+        self.load_admin(library)
+        with self.clickable_selector(".add-row a") as el:
+            el.click()
+        with self.clickable_selector('#id_book_set-0-title') as el:
+            el.send_keys('Difference and Repetition')
+        self.select2_send_keys('book_set-0-publisher', u'co%s' % Keys.ENTER)
+        self.save_form()
+        library.refresh_from_db()
+        books = library.book_set.all()
+        self.assertNotEqual(len(books), 0, "Book inline did not save")
+        self.assertEqual(books[0].publisher, columbia_univ_press)
