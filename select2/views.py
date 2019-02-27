@@ -113,7 +113,7 @@ class Select2View(object):
         try:
             field, model_cls = self.get_field_and_model()
         except ViewException as e:
-            return self.get_response({'error': unicode(e)}, status=500)
+            return self.get_response({'error': six.text_type(e)}, status=500)
 
         q = self.request.GET.get('q', None)
         try:
@@ -126,7 +126,7 @@ class Select2View(object):
                 raise InvalidParameter("q parameter must be comma separated "
                                        "list of integers")
         except InvalidParameter as e:
-            return self.get_response({'error': unicode(e)}, status=500)
+            return self.get_response({'error': six.text_type(e)}, status=500)
 
         queryset = field.queryset.filter(**{
             (u'%s__in' % compat_rel(field).get_related_field().name): pks,
@@ -158,7 +158,7 @@ class Select2View(object):
         try:
             field, model_cls = self.get_field_and_model()
         except ViewException as e:
-            return self.get_response({'error': unicode(e)}, status=500)
+            return self.get_response({'error': six.text_type(e)}, status=500)
 
         queryset = copy.deepcopy(field.queryset)
 
@@ -185,7 +185,7 @@ class Select2View(object):
                 if page < 1:
                     raise InvalidParameter("Invalid page '%s' passed")
         except InvalidParameter as e:
-            return self.get_response({'error': unicode(e)}, status=500)
+            return self.get_response({'error': six.text_type(e)}, status=500)
 
         search_field = field.search_field
         if callable(search_field):

@@ -11,3 +11,5 @@ pip-log.txt
 *swp
 ghostdriver.log
 .tox
+venv/
+.python-version

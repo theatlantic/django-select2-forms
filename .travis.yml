@@ -2,27 +2,46 @@ language: python
 
 sudo: false
 
-install:
-  - pip install tox 
+cache:
+  pip: true
+  directories:
+    - bin
 
-script:
-  - travis_retry travis_retry travis_retry tox -- --failfast
+addons:
+  chrome: stable
+
+env:
+  global:
+    - PATH=$HOME/bin:$PATH
 
 matrix:
   include:
-    - { python: 2.7, env: TOXENV=py27-dj18 }
-    - { python: 3.6, env: TOXENV=py36-dj18 }
-    - { python: 2.7, env: TOXENV=py27-dj18-grp }
-    - { python: 2.7, env: TOXENV=py27-dj19 }
-    - { python: 3.6, env: TOXENV=py36-dj19 }
-    - { python: 2.7, env: TOXENV=py27-dj19-grp }
-    - { python: 2.7, env: TOXENV=py27-dj110 }
-    - { python: 3.6, env: TOXENV=py36-dj110 }
-    - { python: 2.7, env: TOXENV=py27-dj110-grp }
     - { python: 2.7, env: TOXENV=py27-dj111 }
-    - { python: 3.6, env: TOXENV=py36-dj111 }
-  allow_failures:
-    - env: TOXENV=py27-dj111
-    - env: TOXENV=py36-dj111
+    - { python: 3.6, env: TOXENV=py36-dj111, dist: xenial }
+    - { python: 3.6, env: TOXENV=py36-dj20, dist: xenial }
+    - { python: 3.7, env: TOXENV=py37-dj111, dist: xenial }
+    - { python: 3.7, env: TOXENV=py37-dj20, dist: xenial }
+    - { python: 3.7, env: TOXENV=py37-dj20-grp, dist: xenial }
 
-cache: pip
+before_script:
+  - mkdir -p ~/bin
+  - |
+    if [ ! -e ~/bin/chromedriver ]; then
+      export CHROMEDRIVER_VERSION=$(curl -q http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+      wget -N http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip -P ~/
+      unzip ~/chromedriver_linux64.zip -d ~/bin
+      rm ~/chromedriver_linux64.zip
+      chmod +x ~/bin/chromedriver
+    fi
+
+install:
+  - pip install tox
+
+script:
+  - |
+    travis_retry travis_retry travis_retry tox -- \
+      --selenium=chrome-headless \
+      --verbosity=2 \
+      --failfast
+
+

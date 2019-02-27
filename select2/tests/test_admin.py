@@ -3,13 +3,13 @@ import unittest
 
 import django
 from django.conf import settings
-from django_admin_testutils import AdminSeleniumTestCase
+from selenosis.testcases import AdminSelenosisTestCase
 from selenium.webdriver.common.keys import Keys
 
 from .models import Author, Publisher, Book, Library
 
 
-class TestAdmin(AdminSeleniumTestCase):
+class TestAdmin(AdminSelenosisTestCase):
 
     root_urlconf = "select2.tests.urls"
 
@@ -39,6 +39,12 @@ class TestAdmin(AdminSeleniumTestCase):
     def field_is_active(self, field):
         return self.selenium.execute_script(
             'return django.jQuery("#s2id_id_%s").is(".select2-container-active")' % field)
+
+    def save_form(self):
+        # Click on header to blur focus from any input elements
+        with self.clickable_selector('#content > h1, #grp-content-title > h1') as el:
+            el.click()
+        super(TestAdmin, self).save_form()
 
     @contextlib.contextmanager
     def select2_open_dropdown(self, field_name, timeout=None):
