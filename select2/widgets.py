@@ -2,10 +2,7 @@ from itertools import chain
 import json
 
 import django
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms import widgets
 from django.forms.utils import flatatt
 from django.utils.datastructures import MultiValueDict
@@ -92,8 +89,7 @@ class Select(widgets.Input):
         if isinstance(option_label, (list, tuple)):
             return {
                 "text": force_text(option_value),
-                "children": filter(None,
-                    [self.option_to_data(v, l) for v, l in option_label]),
+                "children": [_f for _f in [self.option_to_data(v, l) for v, l in option_label] if _f],
             }
         return {
             "id": force_text(option_value),
@@ -135,7 +131,7 @@ class Select(widgets.Input):
             data = []
             for option_value, option_label in chain(self.choices, choices):
                 data.append(self.option_to_data(option_value, option_label))
-            options['data'] = list(filter(None, data))
+            options['data'] = list([_f for _f in data if _f])
 
         attrs.update({
             'data-select2-options': json.dumps(options),

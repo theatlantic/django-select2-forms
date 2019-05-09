@@ -1,7 +1,7 @@
 #!/usr/bin/env python
+import sys
 import warnings
-import django_admin_testutils
-
+import selenosis
 
 def main():
     warnings.simplefilter("error", Warning)
@@ -10,8 +10,9 @@ def main():
     warnings.filterwarnings("ignore", "Usage of ForeignObjectRel.to")
     warnings.filterwarnings("ignore", "on_delete")
     warnings.filterwarnings("ignore", "add_lazy_relation")
-    runtests = django_admin_testutils.RunTests(
-        "select2.tests.settings", "select2")
+    if sys.version_info >= (3, 7):
+        warnings.filterwarnings("ignore", "Using or importing the ABCs")
+    runtests = selenosis.RunTests("select2.tests.settings", "select2")
     runtests()
 
 

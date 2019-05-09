@@ -9,6 +9,16 @@ fields that use the `Select2 javascript
 plugin <http://ivaynberg.github.com/select2/>`_. It was created by
 developers at `The Atlantic <http://www.theatlantic.com/>`_.
 
+Support
+=======
+
+Being that Django added select2 support in 2.0, we will support up to that version
+for compatibility purposes.
+
+* ~=v2.0.2: Python ~=2.7,~=3.6 | Django >=1.8,<2.1
+* ~=v2.1: Python ~=2.7,>=3.6,<3.8 | Django >=1.11,<2.1
+* ~=v3.0: __Python >=3.6,<3.9 | Django >=2.0,<2.1 (future release)__
+
 Installation
 ============
 
