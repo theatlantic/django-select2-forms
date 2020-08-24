@@ -68,11 +68,11 @@ class Select(widgets.Input):
 
         self.attrs.update({
             'data-placeholder': kwargs.pop('overlay', None),
-            'class': combine_css_classes(attrs.get('class', ''), self.default_class),
             'data-sortable': json.dumps(self.sortable),
         })
-
         self.attrs.update(attrs)
+        self.attrs['class'] = combine_css_classes(attrs.get('class', ''),
+                                                  self.default_class)
         self.choices = choices
 
     def reverse(self, lookup_view):
