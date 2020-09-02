@@ -23,6 +23,7 @@ class Select(widgets.Input):
 
     class Media:
         js = (
+            "admin/js/jquery.init.js",
             "select2/js/select2.jquery_ready.js",
             "select2/js/select2.jquery_ui_sortable.js",
             "select2/js/select2.js",
@@ -96,7 +97,7 @@ class Select(widgets.Input):
             "text": force_text(option_label),
         }
 
-    def render(self, name, value, attrs=None, choices=(), js_options=None):
+    def render(self, name, value, attrs=None, choices=(), js_options=None, **kwargs):
         options = {}
         attrs = dict(self.attrs, **(attrs or {}))
         js_options = js_options or {}
