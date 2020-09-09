@@ -7,7 +7,7 @@ readme_rst = os.path.join(os.path.dirname(__file__), 'README.rst')
 
 setup(
     name='django-select2-forms',
-    version='2.1.0',
+    version='2.1.1',
     description='Django form fields using the Select2 jQuery plugin',
     long_description=codecs.open(readme_rst, encoding='utf-8').read(),
     author='Frankie Dintino',
