@@ -13,4 +13,6 @@ class LibraryAdmin(admin.ModelAdmin):
     inlines = [BookInline]
 
 
-admin.site.register([Publisher, Author, Book], admin.ModelAdmin)
+admin.site.register(Publisher)
+admin.site.register(Author)
+admin.site.register(Book)
