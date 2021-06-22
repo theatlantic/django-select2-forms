@@ -9,7 +9,7 @@ fields that use the `Select2 javascript
 plugin <http://ivaynberg.github.com/select2/>`_. It was created by
 developers at `The Atlantic <http://www.theatlantic.com/>`_.
 
-.. contents:: Table of Contents
+.. contents:: Table of Contents:
 
 Support
 =======
@@ -19,17 +19,17 @@ for compatibility purposes.
 
 * ~=v2.0.2: Python ~=2.7,~=3.6 | Django >=1.8,<2.1
 * ~=v2.1: Python ~=2.7,>=3.6,<3.8 | Django >=1.11,<2.1
-* ~=v3.0: __Python >=3.6,<3.9 | Django 2.2,3.1,3.2 (current release)
+* ~=v3.0: Python >=3.6,<3.9 | Django 2.2,3.1,3.2 (current release)
 
 Local Development & Testing
 ===========================
 
-These steps should only need to be done once when you first begin
+The following steps should only need to be done once when you first begin:
 
 Install ``pyenv``
 -----------------
 
-These instructions will assume that you have `Homebrew <https://brew.sh/>`_ installed,
+These instructions assume that you have `Homebrew <https://brew.sh/>`_ installed,
 but not ``pyenv``.
 
 .. code:: bash
@@ -37,7 +37,7 @@ but not ``pyenv``.
     brew install pyenv
     touch ~/.bash_profile
 
-Add the following line to your ``~/bash_profile``::
+Add the following line to your ``~/bash_profile`` or ``.zshrc``::
 
     eval "$(pyenv init -)"
 
@@ -46,6 +46,11 @@ Reload your shell:
 .. code:: bash
 
     . ~/.bash_profile
+or
+
+.. code:: bash
+
+    . ~/.zshrc
 
 Python Repository Setup
 -----------------------
@@ -69,9 +74,6 @@ Finally:
 .. code:: bash
 
     python -m venv venv
-
-Development
-===========
 
 Activate Your Environment
 -------------------------
