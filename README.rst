@@ -9,6 +9,8 @@ fields that use the `Select2 javascript
 plugin <http://ivaynberg.github.com/select2/>`_. It was created by
 developers at `The Atlantic <http://www.theatlantic.com/>`_.
 
+.. contents:: Table of Contents
+
 Support
 =======
 
@@ -17,7 +19,108 @@ for compatibility purposes.
 
 * ~=v2.0.2: Python ~=2.7,~=3.6 | Django >=1.8,<2.1
 * ~=v2.1: Python ~=2.7,>=3.6,<3.8 | Django >=1.11,<2.1
-* ~=v3.0: __Python >=3.6,<3.9 | Django >=2.0,<2.1 (future release)__
+* ~=v3.0: __Python >=3.6,<3.9 | Django 2.2,3.1,3.2 (current release)
+
+Local Development & Testing
+===========================
+
+These steps should only need to be done once when you first begin
+
+Install ``pyenv``
+-----------------
+
+These instructions will assume that you have `Homebrew <https://brew.sh/>`_ installed,
+but not ``pyenv``.
+
+.. code:: bash
+
+    brew install pyenv
+    touch ~/.bash_profile
+
+Add the following line to your ``~/bash_profile``::
+
+    eval "$(pyenv init -)"
+
+Reload your shell:
+
+.. code:: bash
+
+    . ~/.bash_profile
+
+Python Repository Setup
+-----------------------
+
+First, clone the repository and prep your Python environment:
+
+.. code:: bash
+
+    git clone https://github.com/theatlantic/django-select2-forms.git
+    pyenv install 3.6.8
+    pyenv install 3.7.2
+    pyenv install 3.8.0
+    pyenv install 3.9.0
+    pyenv local 3.6.8 3.7.2 3.8.0 3.9.0
+    python -V
+
+The output of the previous command should be ``Python 3.6.8``.
+
+Finally:
+
+.. code:: bash
+
+    python -m venv venv
+
+Development
+===========
+
+Activate Your Environment
+-------------------------
+
+From the base directory:
+
+.. code:: bash
+
+    deactivate  # ignore: -bash: deactivate: command not found
+    . venv/bin/activate
+    pip install -U tox
+
+Running tests
+-------------
+
+.. code:: bash
+
+    tox
+
+Show all available ``tox`` commands:
+
+.. code:: bash
+
+    tox -av
+
+Run only a specific environment:
+
+.. code:: bash
+
+    tox -e <environment-name>  # example: tox -e py36-django22
+
+Only run a specific test:
+
+.. code:: bash
+
+    tox -- pytest -k test_something
+
+Run an arbitrary command in a specific environment:
+
+.. code:: bash
+
+    tox -e py36-django22 -- python  # runs the Python REPL in that environment
+
+Setup a development environment:
+
+.. code:: bash
+
+    tox -e <pyXX-DjangoYY> --develop -r
+    . .tox/<pyXX-DjangoYY>/bin/activate
 
 Installation
 ============
