@@ -1,22 +1,45 @@
-import django
-import dj_database_url
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SECRET_KEY = 'select2-secret-key'
+DEBUG = True
+ROOT_URLCONF = 'urls'
+WSGI_APPLICATION = None
+TIME_ZONE = 'UTC'
+STATIC_URL = '/static/'
 
-from selenosis.settings import *
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'select2'
+]
 
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
-DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL', 'sqlite://:memory:'))
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [BASE_DIR],
+    'APP_DIRS': True,
+    'OPTIONS': {
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+        ],
+    },
+},]
 
-INSTALLED_APPS += (
-    'select2',
-    'select2.tests',
-)
-
-ROOT_URLCONF = 'select2.tests.urls'
-
-if 'grappelli' in INSTALLED_APPS:
-    # django-grappelli has issues with string_if_invalid,
-    # so don't use this setting if testing suit.
-    TEMPLATES[0]['OPTIONS'].pop('string_if_invalid')
-
-TEMPLATES[0]['OPTIONS']['debug'] = True
-DEBUG_PROPAGATE_EXCEPTIONS = True
+DATABASES = {
+    'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': 'db.sqlite'}
+}
