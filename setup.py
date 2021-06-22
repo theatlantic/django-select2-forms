@@ -18,6 +18,7 @@ setup(
     platforms='any',
     install_requires=[
         'django-sortedm2m',
+        'six'
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -27,6 +28,7 @@ setup(
         'Programming Language :: Python',
         'Framework :: Django',
         'Framework :: Django :: 2.2',
+        'Framework :: Django :: 3.0',
         'Framework :: Django :: 3.1',
         'Framework :: Django :: 3.2',
         'Programming Language :: Python',
