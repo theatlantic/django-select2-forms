@@ -100,7 +100,7 @@ Run only a specific environment:
 
 .. code:: bash
 
-    tox -e <environment-name>  # example: tox -e py36-django22
+    tox -e <environment-name>  # example: tox -e py37-django22
 
 Only run a specific test:
 
@@ -112,7 +112,7 @@ Run an arbitrary command in a specific environment:
 
 .. code:: bash
 
-    tox -e py36-django22 -- python  # runs the Python REPL in that environment
+    tox -e py37-django22 -- python  # runs the Python REPL in that environment
 
 Setup a development environment:
 

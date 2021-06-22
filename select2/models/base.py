@@ -67,7 +67,7 @@ class SortableThroughModelBase(ModelBase):
         return super_new(cls, name, bases, attrs)
 
 
-class SortableThroughModel(with_metaclass(models.Model, metaclass=SortableThroughModelBase)):
+class SortableThroughModel(models.Model, metaclass=SortableThroughModelBase):
 
     class Meta:
         abstract = True
