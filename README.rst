@@ -86,9 +86,17 @@ From the base directory:
 Running tests
 -------------
 
+If you have not already done so, set up your environment by chromedriver:
+
 .. code:: bash
 
-    tox
+    brew install --cask chromedriver
+
+Run all tests:
+
+.. code:: bash
+
+    tox -- --selenosis-driver=chrome-headless
 
 Show all available ``tox`` commands:
 
@@ -100,13 +108,13 @@ Run only a specific environment:
 
 .. code:: bash
 
-    tox -e <environment-name>  # example: tox -e py37-django22
+    tox -e <environment-name> -- --selenosis-driver=chrome-headless  # example: tox -e py37-django22
 
 Only run a specific test:
 
 .. code:: bash
 
-    tox -- pytest -k test_something
+    tox -- pytest -k test_something --selenosis-driver=chrome-headless
 
 Run an arbitrary command in a specific environment:
 

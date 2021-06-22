@@ -5,7 +5,11 @@ from django.db import models
 from django.apps import apps
 from django.forms.models import ModelChoiceIterator
 from django.http import HttpResponse
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
+try:
+    from django.forms.models import ModelChoiceIteratorValue
+except ImportError:
+    ModelChoiceIteratorValue = None
 
 from .fields import ManyToManyField, compat_rel
 
@@ -102,6 +106,11 @@ class Select2View(object):
         for value, label in iterator:
             if value is u'':
                 continue
+            
+            if ModelChoiceIteratorValue and isinstance(value, ModelChoiceIteratorValue):
+                # ModelChoiceIteratorValue was added in Django 3.1
+                value = value.value
+
             data['results'].append({
                 'id': value,
                 'text': label,
@@ -130,13 +139,13 @@ class Select2View(object):
         queryset = field.queryset.filter(**{
             (u'%s__in' % compat_rel(field).get_related_field().name): pks,
         }).distinct()
-        pk_ordering = dict([(force_text(pk), i) for i, pk in enumerate(pks)])
+        pk_ordering = dict([(force_str(pk), i) for i, pk in enumerate(pks)])
 
         data = self.get_data(queryset)
 
         # Make sure we return in the same order we were passed
         def results_sort_callback(item):
-            pk = force_text(item['id'])
+            pk = force_str(item['id'])
             return pk_ordering[pk]
         data['results'] = sorted(data['results'], key=results_sort_callback)
 

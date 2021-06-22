@@ -7,7 +7,7 @@ from django.forms import widgets
 from django.forms.utils import flatatt
 from django.utils.datastructures import MultiValueDict
 from django.utils.html import escape, conditional_escape
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.safestring import mark_safe
 
 from .utils import combine_css_classes
@@ -54,7 +54,7 @@ class Select(widgets.Input):
         self.ajax = kwargs.pop('ajax', self.ajax)
         self.js_options = {}
         if js_options is not None:
-            for k, v in obj.items(js_options):
+            for k, v in js_options.items():
                 if k in self.js_options_map:
                     k = self.js_options_map[k]
                 self.js_options[k] = v
@@ -88,12 +88,12 @@ class Select(widgets.Input):
             return
         if isinstance(option_label, (list, tuple)):
             return {
-                "text": force_text(option_value),
+                "text": force_str(option_value),
                 "children": [_f for _f in [self.option_to_data(v, l) for v, l in option_label] if _f],
             }
         return {
-            "id": force_text(option_value),
-            "text": force_text(option_label),
+            "id": force_str(option_value),
+            "text": force_str(option_label),
         }
 
     def render(self, name, value, attrs=None, choices=(), js_options=None, **kwargs):
@@ -101,7 +101,7 @@ class Select(widgets.Input):
         attrs = dict(self.attrs, **(attrs or {}))
         js_options = js_options or {}
 
-        for k, v in obj.items(dict(self.js_options, **js_options)):
+        for k, v in dict(self.js_options, **js_options).items():
             if k in self.js_options_map:
                 k = self.js_options_map[k]
             options[k] = v
@@ -118,7 +118,7 @@ class Select(widgets.Input):
                 'dataType': 'jsonp' if is_jsonp else 'json',
                 'quietMillis': quiet_millis,
             }
-            for k, v in obj.items(ajax_opts):
+            for k, v in ajax_opts.items():
                 if k in self.js_options_map:
                     k = self.js_options_map[k]
                 default_ajax_opts[k] = v
@@ -163,7 +163,7 @@ class Select(widgets.Input):
         return mark_safe(u'\n'.join(output))
 
     def render_option(self, selected_choices, option_value, option_label):
-        option_value = force_text(option_value)
+        option_value = force_str(option_value)
         if option_value in selected_choices:
             selected_html = u' selected="selected"'
             if not self.allow_multiple_selected:
@@ -173,15 +173,15 @@ class Select(widgets.Input):
             selected_html = ''
         return u'<option value="%s"%s>%s</option>' % (
             escape(option_value), selected_html,
-            conditional_escape(force_text(option_label)))
+            conditional_escape(str(option_label)))
 
     def render_options(self, choices, selected_choices):
         # Normalize to strings.
-        selected_choices = set(force_text(v) for v in selected_choices)
+        selected_choices = set(force_str(v) for v in selected_choices)
         output = []
         for option_value, option_label in chain(self.choices, choices):
             if isinstance(option_label, (list, tuple)):
-                output.append(u'<optgroup label="%s">' % escape(force_text(option_value)))
+                output.append(u'<optgroup label="%s">' % escape(force_str(option_value)))
                 for option in option_label:
                     output.append(self.render_option(selected_choices, *option))
                 output.append(u'</optgroup>')
@@ -214,7 +214,7 @@ class SelectMultiple(Select):
 
     def format_value(self, value):
         if isinstance(value, list):
-            value = u','.join([force_text(v) for v in value])
+            value = u','.join([force_str(v) for v in value])
         return value
 
     if django.VERSION < (1, 10):

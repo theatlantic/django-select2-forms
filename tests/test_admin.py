@@ -9,11 +9,35 @@ from selenium.webdriver.common.keys import Keys
 from .models import Author, Publisher, Book, Library
 
 
+def load_fixtures():
+    Publisher.objects.bulk_create([
+            Publisher(pk=pk, name=name, country=country)
+            for pk, name, country in [
+                [1, "University of Minnesota Press", "US"],
+                [2, "Penguin Press", "US"],
+                [3, "Presses Universitaires de France", "FR"],
+                [4, "Columbia University Press", "US"],
+            ]
+        ])
+
+    Author.objects.bulk_create([
+            Author(pk=pk, first_name=first, last_name=last, alive=alive)
+            for pk, first, last, alive in [
+                [1, "Gilles", "Deleuze", False],
+                [2, "Félix", "Guattari", False],
+                [3, "Thomas", "Pynchon", True],
+                [4, "Mark", "Leyner", True],
+            ]
+        ])
+
+
 class TestAdmin(AdminSelenosisTestCase):
 
-    root_urlconf = "select2.tests.urls"
+    root_urlconf = "tests.urls"
 
-    fixtures = ["select2-test-data.xml"]
+    def setUp(self):
+        super().setUp()
+        load_fixtures()
 
     def initialize_page(self):
         super(TestAdmin, self).initialize_page()

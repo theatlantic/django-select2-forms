@@ -3,7 +3,7 @@ from django import forms
 from django.db import models
 from django.core.exceptions import ImproperlyConfigured, ValidationError, FieldDoesNotExist
 from django.forms.models import ModelChoiceIterator
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.functional import Promise
 try:
     from django.db.models.fields.related import lazy_related_operation
@@ -186,14 +186,14 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, SortedMultipleChoiceField
         qs = self.queryset.filter(**{
             ('%s__in' % key): value,
         })
-        pks = set([force_text(getattr(o, key)) for o in qs])
+        pks = set([force_str(getattr(o, key)) for o in qs])
 
         # Create a dictionary for storing the original order of the items
         # passed from the form
         pk_positions = {}
 
         for i, val in enumerate(value):
-            pk = force_text(val)
+            pk = force_str(val)
             if pk not in pks:
                 raise ValidationError(self.error_messages['invalid_choice'] % val)
             pk_positions[pk] = i
@@ -207,7 +207,7 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, SortedMultipleChoiceField
             sort_value_field_name = self.sort_field.name
             objs = []
             for i, obj in enumerate(qs):
-                pk = force_text(getattr(obj, key))
+                pk = force_str(getattr(obj, key))
                 setattr(obj, sort_value_field_name, pk_positions[pk])
                 objs.append(obj)
             return sorted(objs, key=lambda obj: getattr(obj, sort_value_field_name))
