@@ -5,7 +5,6 @@ from django.core.exceptions import ImproperlyConfigured, ValidationError, FieldD
 from django.forms.models import ModelChoiceIterator
 from django.utils.encoding import force_text
 from django.utils.functional import Promise
-from six import string_types
 try:
     from django.db.models.fields.related import lazy_related_operation
 except ImportError:
@@ -171,7 +170,7 @@ class ModelMultipleChoiceField(Select2ModelFieldMixin, SortedMultipleChoiceField
         elif not self.required and not value:
             return []
 
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             value = value.split(',')
 
         if not isinstance(value, (list, tuple)):
@@ -272,7 +271,7 @@ class RelatedFieldMixin(object):
                     'field_name': self.name,
                     'app_label': self.model._meta.app_label,
                     'object_name': self.model._meta.object_name})
-        if not callable(self.search_field) and not isinstance(self.search_field, string_types):
+        if not callable(self.search_field) and not isinstance(self.search_field, str):
             raise TypeError(
                 ("keyword argument 'search_field' must be either callable or "
                  "string on field '%(field_name)s' of model "
@@ -280,7 +279,7 @@ class RelatedFieldMixin(object):
                     'field_name': self.name,
                     'app_label': self.model._meta.app_label,
                     'object_name': self.model._meta.object_name})
-        if isinstance(self.search_field, string_types):
+        if isinstance(self.search_field, str):
             try:
                 opts = related.parent_model._meta
             except AttributeError:
@@ -353,7 +352,7 @@ class ManyToManyField(RelatedFieldMixin, SortedManyToManyField):
             def resolve_sort_field(field, model, cls):
                 model._sort_field_name = field.sort_value_field_name
                 field.sort_field = model._meta.get_field(field.sort_value_field_name)
-            if isinstance(compat_rel(self).through, string_types):
+            if isinstance(compat_rel(self).through, str):
                 compat_add_lazy_relation(cls, self, compat_rel(self).through, resolve_sort_field)
             else:
                 resolve_sort_field(self, compat_rel(self).through, cls)

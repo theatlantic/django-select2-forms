@@ -17,9 +17,7 @@ Support
 Being that Django added select2 support in 2.0, we will support up to that version
 for compatibility purposes.
 
-* ~=v2.0.2: Python ~=2.7,~=3.6 | Django >=1.8,<2.1
-* ~=v2.1: Python ~=2.7,>=3.6,<3.8 | Django >=1.11,<2.1
-* ~=v3.0: Python >=3.6,<3.9 | Django 2.2,3.1,3.2 (current release)
+* ~=v3.0: Python >=3.7,<3.9 | Django 2.2,3.1,3.2 (current release)
 
 Local Development & Testing
 ===========================
@@ -60,14 +58,13 @@ First, clone the repository and prep your Python environment:
 .. code:: bash
 
     git clone https://github.com/theatlantic/django-select2-forms.git
-    pyenv install 3.6.8
     pyenv install 3.7.2
     pyenv install 3.8.0
     pyenv install 3.9.0
-    pyenv local 3.6.8 3.7.2 3.8.0 3.9.0
+    pyenv local 3.7.2 3.8.0 3.9.0
     python -V
 
-The output of the previous command should be ``Python 3.6.8``.
+The output of the previous command should be ``Python 3.7.2``.
 
 Finally:
 

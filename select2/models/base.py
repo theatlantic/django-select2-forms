@@ -2,7 +2,6 @@ from __future__ import absolute_import
 import sys
 
 from django.db import models
-from six import with_metaclass
 from django.apps import apps
 from django.db.models.base import ModelBase
 from django.utils.functional import SimpleLazyObject
@@ -68,7 +67,7 @@ class SortableThroughModelBase(ModelBase):
         return super_new(cls, name, bases, attrs)
 
 
-class SortableThroughModel(with_metaclass(SortableThroughModelBase, models.Model)):
+class SortableThroughModel(with_metaclass(models.Model, metaclass=SortableThroughModelBase)):
 
     class Meta:
         abstract = True

@@ -6,7 +6,6 @@ from django.apps import apps
 from django.forms.models import ModelChoiceIterator
 from django.http import HttpResponse
 from django.utils.encoding import force_text
-from six import string_types, text_type
 
 from .fields import ManyToManyField, compat_rel
 
@@ -24,7 +23,7 @@ class JsonResponse(HttpResponse):
     callback = None
 
     def __init__(self, content='', callback=None, content_type="application/json", *args, **kwargs):
-        if not isinstance(content, string_types):
+        if not isinstance(content, str):
             content = json.dumps(content)
         if callback is not None:
             self.callback = callback
@@ -113,7 +112,7 @@ class Select2View(object):
         try:
             field, model_cls = self.get_field_and_model()
         except ViewException as e:
-            return self.get_response({'error': text_type(e)}, status=500)
+            return self.get_response({'error': str(e)}, status=500)
 
         q = self.request.GET.get('q', None)
         try:
@@ -126,7 +125,7 @@ class Select2View(object):
                 raise InvalidParameter("q parameter must be comma separated "
                                        "list of integers")
         except InvalidParameter as e:
-            return self.get_response({'error': text_type(e)}, status=500)
+            return self.get_response({'error': str(e)}, status=500)
 
         queryset = field.queryset.filter(**{
             (u'%s__in' % compat_rel(field).get_related_field().name): pks,
@@ -158,7 +157,7 @@ class Select2View(object):
         try:
             field, model_cls = self.get_field_and_model()
         except ViewException as e:
-            return self.get_response({'error': text_type(e)}, status=500)
+            return self.get_response({'error': str(e)}, status=500)
 
         queryset = copy.deepcopy(field.queryset)
 
@@ -185,7 +184,7 @@ class Select2View(object):
                 if page < 1:
                     raise InvalidParameter("Invalid page '%s' passed")
         except InvalidParameter as e:
-            return self.get_response({'error': text_type(e)}, status=500)
+            return self.get_response({'error': str(e)}, status=500)
 
         search_field = field.search_field
         if callable(search_field):

@@ -9,7 +9,6 @@ from django.utils.datastructures import MultiValueDict
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
-from six import string_types, iteritems
 
 from .utils import combine_css_classes
 
@@ -55,7 +54,7 @@ class Select(widgets.Input):
         self.ajax = kwargs.pop('ajax', self.ajax)
         self.js_options = {}
         if js_options is not None:
-            for k, v in iteritems(js_options):
+            for k, v in obj.items(js_options):
                 if k in self.js_options_map:
                     k = self.js_options_map[k]
                 self.js_options[k] = v
@@ -102,7 +101,7 @@ class Select(widgets.Input):
         attrs = dict(self.attrs, **(attrs or {}))
         js_options = js_options or {}
 
-        for k, v in iteritems(dict(self.js_options, **js_options)):
+        for k, v in obj.items(dict(self.js_options, **js_options)):
             if k in self.js_options_map:
                 k = self.js_options_map[k]
             options[k] = v
@@ -119,7 +118,7 @@ class Select(widgets.Input):
                 'dataType': 'jsonp' if is_jsonp else 'json',
                 'quietMillis': quiet_millis,
             }
-            for k, v in iteritems(ajax_opts):
+            for k, v in obj.items(ajax_opts):
                 if k in self.js_options_map:
                     k = self.js_options_map[k]
                 default_ajax_opts[k] = v
@@ -227,6 +226,6 @@ class SelectMultiple(Select):
             value = data.getlist(name)
         else:
             value = data.get(name, None)
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             return [v for v in value.split(',') if v]
         return value
