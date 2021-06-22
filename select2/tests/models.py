@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Q
-from django.utils.encoding import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 
 from select2.fields import (
     ForeignKey as Select2ForeignKey, ManyToManyField as Select2ManyToManyField)
