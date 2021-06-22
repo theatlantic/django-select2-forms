@@ -2,7 +2,7 @@ import django
 from django import forms
 from django.db import models
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from django.forms.models import ModelChoiceIterator
 from django.utils.encoding import force_text
 from django.utils.functional import Promise
