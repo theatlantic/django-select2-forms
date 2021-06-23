@@ -44,6 +44,7 @@ Reload your shell:
 .. code:: bash
 
     . ~/.bash_profile
+
 or
 
 .. code:: bash
