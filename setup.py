@@ -7,7 +7,7 @@ readme_rst = os.path.join(os.path.dirname(__file__), 'README.rst')
 
 setup(
     name='django-select2-forms',
-    version='2.1.1',
+    version='3.0.0',
     description='Django form fields using the Select2 jQuery plugin',
     long_description=codecs.open(readme_rst, encoding='utf-8').read(),
     author='Frankie Dintino',
@@ -26,14 +26,15 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Framework :: Django',
-        'Framework :: Django :: 1.11',
-        'Framework :: Django :: 2.0',
+        'Framework :: Django :: 2.2',
+        'Framework :: Django :: 3.1',
+        'Framework :: Django :: 3.2',
         'Programming Language :: Python',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+
     ],
     include_package_data=True,
     zip_safe=False

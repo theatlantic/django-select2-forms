@@ -1,12 +1,10 @@
 from django.db import models
 from django.db.models import Q
-from django.utils.encoding import python_2_unicode_compatible
 
 from select2.fields import (
     ForeignKey as Select2ForeignKey, ManyToManyField as Select2ManyToManyField)
 
 
-@python_2_unicode_compatible
 class Publisher(models.Model):
     name = models.CharField(max_length=100)
     country = models.CharField(max_length=2)
@@ -18,7 +16,6 @@ class Publisher(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
 class Author(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -31,7 +28,6 @@ class Author(models.Model):
         return "%s %s" % (self.first_name, self.last_name)
 
 
-@python_2_unicode_compatible
 class Library(models.Model):
     name = models.CharField(max_length=100)
 
@@ -39,7 +35,6 @@ class Library(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
 class Book(models.Model):
     title = models.CharField(max_length=100)
     library = models.ForeignKey(Library, blank=True, null=True, on_delete=models.CASCADE)
