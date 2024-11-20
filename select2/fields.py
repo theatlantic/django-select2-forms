@@ -133,12 +133,11 @@ class Select2ModelFieldMixin(Select2FieldMixin):
         self.choice_iterator_cls = kwargs.pop('choice_iterator_cls', self.choice_iterator_cls)
         super(Select2ModelFieldMixin, self).__init__(*args, **kwargs)
 
-    def _get_choices(self):
+    @Select2FieldMixin.choices.getter
+    def choices(self):
         if hasattr(self, '_choices'):
             return self._choices
         return self.choice_iterator_cls(self)
-
-    choices = property(_get_choices, forms.ChoiceField._set_choices)
 
 
 class ModelChoiceField(Select2ModelFieldMixin, forms.ModelChoiceField):
