@@ -1,13 +1,42 @@
 name: Test
 
-on: push
+on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        include:
+          - django-version: "2.2"
+            python-version: "3.8"
+          - django-version: "2.2"
+            python-version: "3.8"
+            grappelli: "1"
+          - django-version: "3.2"
+            python-version: "3.9"
+          - django-version: "3.2"
+            python-version: "3.10"
+            grappelli: "1"
+          - django-version: "4.2"
+            python-version: "3.10"
+          - django-version: "4.2"
+            python-version: "3.11"
+            grappelli: "1"
+          - django-version: "5.1"
+            python-version: "3.12"
+          - django-version: "5.2"
+            python-version: "3.12"
+          - django-version: "5.2"
+            python-version: "3.13"
+            grappelli: "1"
+
+    runs-on: ubuntu-latest
+    name: Django ${{ matrix.django-version }} (Python ${{ matrix.python-version }})${{ matrix.grappelli == '1' && ' + grappelli' || '' }}${{ matrix.s3 == '1' && ' + s3' || '' }}
+    env:
+      PYTHON: ${{ matrix.python-version }}
+      DJANGO: ${{ matrix.django-version }}
+      GRAPPELLI: ${{ matrix.grappelli || '0' }}
 
     steps:
     - uses: actions/checkout@v3
@@ -17,16 +46,59 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Setup chromedriver
-      uses: nanasess/setup-chromedriver@v1.0.5
-
-    - name: Install dependencies
+    - name: Install tox
       run: |
-        python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
+       python3 -m pip install tox tox-gh-actions
 
-    - name: Test with tox
+    - name: Run tests
       run: |
         tox -- -v --selenosis-driver=chrome-headless || \
         tox -- -v --selenosis-driver=chrome-headless || \
         tox -- -v --selenosis-driver=chrome-headless
+
+    - name: Upload junit xml
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: junit-reports-django-${{ matrix.django-version }}-python${{ matrix.python-version }}${{ matrix.grappelli == '1' && '-grappelli' || '' }}${{ matrix.s3 == '1' && '-s3' || '' }}-${{ github.sha }}
+        path: reports/*.xml
+        overwrite: true
+
+    - name: Combine coverage
+      run: tox -e coverage-report
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v5
+      with:
+        name: ${{ github.workflow }}
+        files: .tox/coverage/coverage.xml
+        env_vars: "DJANGO,GRAPPELLI,PYTHON"
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+  report:
+    if: always()
+    needs: build
+    runs-on: ubuntu-latest
+    name: "Report Test Results"
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Publish Unit Test Results
+        if: always()
+        uses: mikepenz/action-junit-report@1a91e26932fb7ba410a31fab1f09266a96d29971
+        with:
+          report_paths: ./*.xml
+          require_tests: true
+          fail_on_failure: true
+          check_name: Test Report
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  success:
+    needs: [report]
+    runs-on: ubuntu-latest
+    name: Test Successful
+    steps:
+      - name: Success
+        run: echo Test Successful

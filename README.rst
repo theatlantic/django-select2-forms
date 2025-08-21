@@ -14,10 +14,8 @@ developers at `The Atlantic <http://www.theatlantic.com/>`_.
 Support
 =======
 
-Being that Django added select2 support in 2.0, we will support up to that version
-for compatibility purposes.
-
-* ~=v3.0: Python >=3.7,<3.9 | Django 2.2,3.1,3.2 (current release)
+django-select2-forms should work with all currently supported releases as well
+as the two most recent unsupported LTS versions.
 
 Local Development & Testing
 ===========================

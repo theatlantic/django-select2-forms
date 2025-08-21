@@ -5,6 +5,7 @@ import django
 from django.conf import settings
 from selenosis.testcases import AdminSelenosisTestCase
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 
 from .models import Author, Publisher, Book, Library
 
@@ -93,7 +94,8 @@ class TestAdmin(AdminSelenosisTestCase):
             yield el
 
     def get_dropdown_count(self):
-        return len(self.selenium.find_elements_by_css_selector(
+        return len(self.selenium.find_elements(
+            By.CSS_SELECTOR,
             '.select2-drop-active .select2-results '
             '.select2-result-selectable:not(.select2-selected)'))
 
@@ -260,12 +262,14 @@ class TestAdmin(AdminSelenosisTestCase):
     def test_inline_add_init(self):
         if django.VERSION < (1, 9):
             raise unittest.SkipTest("Django 1.8 does not have the formset:added event")
-        if 'grappelli' in settings.INSTALLED_APPS:
-            raise unittest.SkipTest("django-grappelli does not have the formset:added event")
         library = Library.objects.create(name="Princeton University Library")
         columbia_univ_press = Publisher.objects.get(name='Columbia University Press')
         self.load_admin(library)
-        with self.clickable_selector(".add-row a") as el:
+        if "grappelli" in settings.INSTALLED_APPS:
+            add_row_selector = ".grp-add-handler:not(.grp-icon)"
+        else:
+            add_row_selector = ".add-row a"
+        with self.clickable_selector(add_row_selector) as el:
             el.click()
         with self.clickable_selector('#id_book_set-0-title') as el:
             el.send_keys('Difference and Repetition')
