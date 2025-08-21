@@ -65,6 +65,9 @@ var DjangoSelect2 = window.DjangoSelect2 || {};
             DjangoSelect2.init(this);
         });
         $(document).on('formset:added', function(event, $form) {
+            if (typeof $form === "undefined") {
+                $form = $(event.target);
+            }
             $form.find('.django-select2:not([name*="__prefix__"])').each(function() {
                 DjangoSelect2.init(this);
             });

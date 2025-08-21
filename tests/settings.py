@@ -18,6 +18,13 @@ INSTALLED_APPS = [
     'tests',
 ]
 
+try:
+    import grappelli  # noqa
+except ImportError:
+    pass
+else:
+    INSTALLED_APPS.insert(0, 'grappelli')
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

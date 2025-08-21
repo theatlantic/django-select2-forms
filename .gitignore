@@ -13,3 +13,6 @@ ghostdriver.log
 .tox
 venv/
 .python-version
+reports
+coverage.xml
+.coverage
